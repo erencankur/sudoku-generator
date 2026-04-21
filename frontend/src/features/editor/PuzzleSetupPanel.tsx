@@ -84,7 +84,7 @@ export default function PuzzleSetupPanel({
           className="text-input"
           type="number"
           min={1}
-          max={40}
+          max={144}
           value={solutionLimit}
           onChange={(event) => {
             const parsed = Number.parseInt(event.target.value, 10);
