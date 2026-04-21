@@ -1,4 +1,5 @@
 from reportlab.lib import colors
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 
@@ -8,19 +9,34 @@ from ..schemas.puzzle import PuzzleDocument
 
 def draw_metadata(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLayout, subtitle: str) -> None:
     canvas.setFillColor(colors.HexColor("#1f1a17"))
-    canvas.setFont("Helvetica-Bold", 22)
-    canvas.drawCentredString(layout.page_width / 2, layout.title_y, puzzle.name)
+    title_prefix = "Consecutive Pairs Sudoku by" if puzzle.variant == "consecutive" else "Classic Sudoku by"
+    prefix_font = "Helvetica"
+    prefix_size = 20
+    name_font = "Helvetica-Bold"
+    name_size = 27 if len(puzzle.name) <= 16 else 24
+
+    prefix_width = stringWidth(title_prefix + " ", prefix_font, prefix_size)
+    name_width = stringWidth(puzzle.name, name_font, name_size)
+    total_width = prefix_width + name_width
+    start_x = (layout.page_width - total_width) / 2
+
+    canvas.setFont(prefix_font, prefix_size)
+    canvas.drawString(start_x, layout.title_y, title_prefix + " ")
+
+    canvas.setFont(name_font, name_size)
+    canvas.drawString(start_x + prefix_width, layout.title_y - 2, puzzle.name)
 
     canvas.setFillColor(colors.HexColor("#6b6056"))
-    canvas.setFont("Helvetica", 11)
-    canvas.drawCentredString(layout.page_width / 2, layout.subtitle_y, subtitle)
+    if subtitle:
+        canvas.setFont("Helvetica", 9)
+        canvas.drawCentredString(layout.page_width / 2, layout.subtitle_y, subtitle)
 
     canvas.setLineWidth(0.7)
     canvas.setStrokeColor(colors.HexColor("#6b6056"))
     canvas.line(18 * mm, layout.footer_rule_y, layout.page_width - 18 * mm, layout.footer_rule_y)
 
-    canvas.setFont("Helvetica", 10)
-    canvas.drawString(layout.board_origin_x, layout.label_y, "Classic" if puzzle.variant == "classic" else "Consecutive")
+    canvas.setFont("Helvetica-Oblique", 13)
+    canvas.drawString(layout.board_origin_x, layout.label_y, "Classic" if puzzle.variant == "classic" else "Checkered")
     canvas.drawRightString(layout.board_origin_x + layout.board_size, layout.label_y, f"{{1-{puzzle.size}}}")
 
     canvas.setFont("Helvetica", 9.5)

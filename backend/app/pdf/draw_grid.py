@@ -39,7 +39,7 @@ def draw_grid(
         canvas.line(vertical_x, layout.board_origin_y, vertical_x, layout.board_origin_y + layout.board_size)
 
     canvas.setFillColor(colors.HexColor("#1f1a17"))
-    canvas.setFont("Helvetica", 18 if puzzle.size == 6 else 16)
+    canvas.setFont("Helvetica", 24 if puzzle.size == 6 else 18)
 
     for row_index, row in enumerate(values):
         for col_index, value in enumerate(row):
@@ -47,5 +47,5 @@ def draw_grid(
                 continue
 
             center_x = layout.board_origin_x + (col_index + 0.5) * layout.cell_size
-            center_y = top - (row_index + 0.62) * layout.cell_size
+            center_y = top - (row_index + 0.68) * layout.cell_size
             canvas.drawCentredString(center_x, center_y, str(value))

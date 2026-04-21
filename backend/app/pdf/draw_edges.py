@@ -11,10 +11,10 @@ def draw_consecutive_edges(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLa
         return
 
     top = layout.board_origin_y + layout.board_size
-    radius = 2.8 * mm if puzzle.size == 6 else 2.4 * mm
+    radius = 3.0 * mm if puzzle.size == 6 else 2.6 * mm
     canvas.setFillColor(colors.HexColor("#d5d0c7"))
-    canvas.setStrokeColor(colors.HexColor("#8e8578"))
-    canvas.setLineWidth(0.8)
+    canvas.setStrokeColor(colors.HexColor("#7f776d"))
+    canvas.setLineWidth(0.9)
 
     for row in range(puzzle.size):
         for col in range(puzzle.size - 1):

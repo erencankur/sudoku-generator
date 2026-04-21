@@ -20,8 +20,8 @@ def draw_board_page(
 
 
 def draw_puzzle_page(canvas: Canvas, puzzle: PuzzleDocument) -> None:
-    draw_board_page(canvas, puzzle, puzzle.grid, "Puzzle Page")
+    draw_board_page(canvas, puzzle, puzzle.grid, "")
 
 
 def draw_solution_page(canvas: Canvas, puzzle: PuzzleDocument, approved_solution: list[list[int]]) -> None:
-    draw_board_page(canvas, puzzle, approved_solution, "Solution Page")
+    draw_board_page(canvas, puzzle, approved_solution, "")
