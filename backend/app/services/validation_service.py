@@ -18,6 +18,7 @@ def _duplicates(values: list[int | None]) -> dict[int, list[int]]:
 
 def validate_puzzle(
     puzzle: PuzzleDocument,
+    allow_blank_as_circle: bool = False,
 ) -> ValidationResponse:
     issues: list[ValidationIssue] = []
     size = puzzle.size
@@ -93,6 +94,15 @@ def validate_puzzle(
                             message="Unmarked adjacent cells cannot be consecutive.",
                         )
                     )
+                if marker == 0 and consecutive and not allow_blank_as_circle:
+                    issues.append(
+                        ValidationIssue(
+                            type="non_consecutive_violation",
+                            cells=[(row, col), (row, col + 1)],
+                            edges=[EdgeReference(orientation="horizontal", row=row, col=col)],
+                            message="Blank adjacent cells cannot be consecutive.",
+                        )
+                    )
 
         for row in range(size - 1):
             for col in range(size):
@@ -120,6 +130,15 @@ def validate_puzzle(
                             cells=[(row, col), (row + 1, col)],
                             edges=[EdgeReference(orientation="vertical", row=row, col=col)],
                             message="Unmarked adjacent cells cannot be consecutive.",
+                        )
+                    )
+                if marker == 0 and consecutive and not allow_blank_as_circle:
+                    issues.append(
+                        ValidationIssue(
+                            type="non_consecutive_violation",
+                            cells=[(row, col), (row + 1, col)],
+                            edges=[EdgeReference(orientation="vertical", row=row, col=col)],
+                            message="Blank adjacent cells cannot be consecutive.",
                         )
                     )
 

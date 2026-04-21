@@ -11,6 +11,7 @@ from .enumerator import EnumerationResult
 def _find_best_empty_cell(
     board: np.ndarray,
     puzzle: PuzzleDocument,
+    allow_blank_as_circle: bool = False,
 ) -> tuple[int, int, list[int]] | None:
     best: tuple[int, int, list[int]] | None = None
 
@@ -19,7 +20,13 @@ def _find_best_empty_cell(
             if int(board[row, col]) != 0:
                 continue
 
-            candidates = candidate_values(board, puzzle, row, col)
+            candidates = candidate_values(
+                board,
+                puzzle,
+                row,
+                col,
+                allow_blank_as_circle=allow_blank_as_circle,
+            )
             if not candidates:
                 return row, col, []
 
@@ -32,7 +39,11 @@ def _find_best_empty_cell(
     return best
 
 
-def enumerate_solutions(puzzle: PuzzleDocument, solution_limit: int) -> EnumerationResult:
+def enumerate_solutions(
+    puzzle: PuzzleDocument,
+    solution_limit: int,
+    allow_blank_as_circle: bool = False,
+) -> EnumerationResult:
     board = to_numpy_grid(puzzle)
     collected: list[list[list[int]]] = []
     truncated = False
@@ -45,7 +56,7 @@ def enumerate_solutions(puzzle: PuzzleDocument, solution_limit: int) -> Enumerat
             truncated = True
             return
 
-        choice = _find_best_empty_cell(board, puzzle)
+        choice = _find_best_empty_cell(board, puzzle, allow_blank_as_circle)
         if choice is None:
             collected.append(to_python_grid(board))
             if len(collected) >= hard_limit:

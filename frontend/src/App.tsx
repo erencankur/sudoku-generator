@@ -267,7 +267,7 @@ export default function App() {
                 title={puzzle.variant === 'consecutive' ? 'Mevcut Tabloya Gore Cozumler' : 'Bulunan Cozumleri Incele'}
                 description={
                   puzzle.variant === 'consecutive'
-                    ? 'Bu bolum, girdiginiz tabloyu ve mavi daireleri mevcut haliyle birebir kabul eder.'
+                    ? 'Bu bolum, bos biraktiginiz daireleri daire yok olarak kabul eder.'
                     : 'Bu bolum, bulunan tum cozumleri mevcut tablo kurallariyla listeler.'
                 }
                 emptyMessage={
@@ -291,7 +291,7 @@ export default function App() {
                   puzzle={puzzle}
                   eyebrow="2. Bolum"
                   title="Mavi Daireleri Kabul Eden Cozumler"
-                  description={`Bu bolum, mavi daireleri zorunlu kabul eder; isaretlenmemis komsuluklar ise var ya da yok olabilir. En fazla ${maxAddedBlueCircles} yeni mavi daireye izin verilir.`}
+                    description={`Bu bolum, bos biraktiginiz daireler icin hem daire yok hem daire var durumlarini dener. En fazla ${maxAddedBlueCircles} yeni mavi daireye izin verilir.`}
                   emptyMessage="Bu esnek yorum altinda secilen mavi daire limitiyle cozum bulunamadi."
                   result={solveResult.relaxed}
                   selectedSolutionIndex={relaxedSolutionIndex}

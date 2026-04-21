@@ -57,9 +57,9 @@ def solve_puzzle_document(
     solution_limit: int,
     max_added_blue_circles: int,
 ) -> SolveResponse:
-    strict_validation = validate_puzzle(puzzle)
+    strict_validation = validate_puzzle(puzzle, allow_blank_as_circle=False)
     strict_enumeration = (
-        enumerate_solutions(puzzle, solution_limit)
+        enumerate_solutions(puzzle, solution_limit, allow_blank_as_circle=False)
         if strict_validation.is_valid
         else None
     )
@@ -67,7 +67,14 @@ def solve_puzzle_document(
 
     relaxed_result = None
     if puzzle.variant == "consecutive":
-        relaxed_result = _filter_by_marker_limit(puzzle, strict_result, max_added_blue_circles)
+        relaxed_validation = validate_puzzle(puzzle, allow_blank_as_circle=True)
+        relaxed_enumeration = (
+            enumerate_solutions(puzzle, solution_limit, allow_blank_as_circle=True)
+            if relaxed_validation.is_valid
+            else None
+        )
+        relaxed_result = _build_result_set(relaxed_validation, relaxed_enumeration)
+        relaxed_result = _filter_by_marker_limit(puzzle, relaxed_result, max_added_blue_circles)
 
     return SolveResponse(**strict_result.model_dump(), relaxed=relaxed_result)
 

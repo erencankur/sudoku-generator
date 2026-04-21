@@ -32,6 +32,7 @@ def satisfies_adjacent_constraints(
     row: int,
     col: int,
     candidate: int,
+    allow_blank_as_circle: bool = False,
 ) -> bool:
     if puzzle.variant != "consecutive":
         return True
@@ -47,6 +48,8 @@ def satisfies_adjacent_constraints(
             return False
         if marker_state == -1 and candidate_is_consecutive:
             return False
+        if marker_state == 0 and candidate_is_consecutive and not allow_blank_as_circle:
+            return False
 
     return True
 
@@ -56,6 +59,7 @@ def candidate_values(
     puzzle: PuzzleDocument,
     row: int,
     col: int,
+    allow_blank_as_circle: bool = False,
 ) -> list[int]:
     if int(board[row, col]) != 0:
         return []
@@ -66,7 +70,14 @@ def candidate_values(
     for candidate in range(1, puzzle.size + 1):
         if candidate in disallowed:
             continue
-        if satisfies_adjacent_constraints(board, puzzle, row, col, candidate):
+        if satisfies_adjacent_constraints(
+            board,
+            puzzle,
+            row,
+            col,
+            candidate,
+            allow_blank_as_circle=allow_blank_as_circle,
+        ):
             candidates.append(candidate)
 
     return candidates

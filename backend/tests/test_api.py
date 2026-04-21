@@ -107,10 +107,8 @@ def test_consecutive_solve_returns_relaxed_solution_set() -> None:
 
     assert response.status_code == 200
     data = response.json()
-    assert data["has_solution"] is True
-    assert data["is_unique"] is True
-    assert data["solution_count_found"] == 1
-    assert data["solutions"][0] == SOLVED_6X6
+    assert data["has_solution"] is False
+    assert data["solution_count_found"] == 0
     assert data["relaxed"]["has_solution"] is True
     assert data["relaxed"]["is_unique"] is True
     assert data["relaxed"]["solution_count_found"] == 1
@@ -131,7 +129,7 @@ def test_consecutive_solve_respects_blue_circle_limit() -> None:
 
     assert response.status_code == 200
     data = response.json()
-    assert data["has_solution"] is True
+    assert data["has_solution"] is False
     assert data["relaxed"]["has_solution"] is False
     assert data["relaxed"]["solution_count_found"] == 0
 
@@ -152,6 +150,7 @@ def test_consecutive_forbidden_edge_blocks_solution() -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["has_solution"] is False
+    assert data["relaxed"]["has_solution"] is False
     assert data["validation"]["is_valid"] is False
     assert any(issue["type"] == "non_consecutive_violation" for issue in data["validation"]["issues"])
 
