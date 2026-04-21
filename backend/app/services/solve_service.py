@@ -1,5 +1,6 @@
 from ..schemas.puzzle import PuzzleDocument
 from ..schemas.solve import SolveResponse, SolveResultSet
+from ..domain.consecutive import count_added_consecutive_markers
 from ..solver.backtracking import enumerate_solutions
 from .validation_service import validate_puzzle
 
@@ -26,7 +27,36 @@ def _build_result_set(validation, enumeration) -> SolveResultSet:
     )
 
 
-def solve_puzzle_document(puzzle: PuzzleDocument, solution_limit: int) -> SolveResponse:
+def _filter_by_marker_limit(
+    puzzle: PuzzleDocument,
+    result: SolveResultSet,
+    max_added_blue_circles: int,
+) -> SolveResultSet:
+    if puzzle.variant != "consecutive" or not result.has_solution:
+        return result
+
+    filtered_solutions = [
+        solution
+        for solution in result.solutions
+        if count_added_consecutive_markers(puzzle, solution) <= max_added_blue_circles
+    ]
+
+    filtered_count = len(filtered_solutions)
+    return SolveResultSet(
+        has_solution=filtered_count > 0,
+        solution_count_found=filtered_count,
+        truncated=result.truncated,
+        is_unique=filtered_count == 1 and not result.truncated,
+        solutions=filtered_solutions,
+        validation=result.validation,
+    )
+
+
+def solve_puzzle_document(
+    puzzle: PuzzleDocument,
+    solution_limit: int,
+    max_added_blue_circles: int,
+) -> SolveResponse:
     strict_validation = validate_puzzle(puzzle)
     strict_enumeration = (
         enumerate_solutions(puzzle, solution_limit)
@@ -48,6 +78,7 @@ def solve_puzzle_document(puzzle: PuzzleDocument, solution_limit: int) -> SolveR
             else None
         )
         relaxed_result = _build_result_set(relaxed_validation, relaxed_enumeration)
+        relaxed_result = _filter_by_marker_limit(puzzle, relaxed_result, max_added_blue_circles)
 
     return SolveResponse(**strict_result.model_dump(), relaxed=relaxed_result)
 

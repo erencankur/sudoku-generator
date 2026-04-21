@@ -7,6 +7,7 @@ from .validation import ValidationResponse
 class SolveRequest(BaseModel):
     puzzle: PuzzleDocument
     solution_limit: int = Field(default=12, ge=1, le=128)
+    max_added_blue_circles: int = Field(default=144, ge=0, le=144)
 
 
 class SolveResultSet(BaseModel):

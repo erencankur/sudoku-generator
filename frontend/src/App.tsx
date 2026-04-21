@@ -22,6 +22,7 @@ export default function App() {
   const {
     puzzle,
     solutionLimit,
+    maxAddedBlueCircles,
     approvedSolutionIndex,
     changeVariant,
     changeSize,
@@ -30,6 +31,7 @@ export default function App() {
     setCell,
     toggleMarker,
     setSolutionLimit,
+    setMaxAddedBlueCircles,
     setApprovedSolutionIndex,
     resetApproval,
   } = store;
@@ -100,7 +102,7 @@ export default function App() {
     setValidationError(null);
 
     try {
-      const result = await solvePuzzle(puzzle, solutionLimit);
+      const result = await solvePuzzle(puzzle, solutionLimit, maxAddedBlueCircles);
       setSolveResult(result);
       setServerIssues(result.validation.issues);
       setStrictSolutionIndex(0);
@@ -108,17 +110,23 @@ export default function App() {
       resetApproval();
 
       if (!result.has_solution && !result.relaxed?.has_solution) {
-        setStatusMessage('Bu girdi ile gecerli bir cozum bulunamadi. Kurallari veya verilen sayilari gozden gecirin.');
+        setStatusMessage(
+          'Bu girdi ile gecerli bir cozum bulunamadi. Mavi daire limiti cok dusukse esnek yorum da bos kalabilir.',
+        );
         return;
       }
 
       if (result.relaxed?.has_solution) {
         if (!result.has_solution) {
-          setStatusMessage('Kesin yorumda cozum yok. Mavi daireli yorum icin cozumler hazir. Iki bolumu de asagida inceleyebilirsiniz.');
+          setStatusMessage(
+            `Kesin yorumda cozum yok. Mavi daireli yorum icin en fazla ${maxAddedBlueCircles} yeni daireye izin verildi. Iki bolumu de asagida inceleyebilirsiniz.`,
+          );
           return;
         }
 
-        setStatusMessage('Kesin yorum ve mavi daireli yorum icin cozumler hazir. Iki bolumu de asagida inceleyebilirsiniz.');
+        setStatusMessage(
+          `Kesin yorum ve mavi daireli yorum icin cozumler hazir. En fazla ${maxAddedBlueCircles} yeni mavi daireye izin verildi.`,
+        );
         return;
       }
 
@@ -208,11 +216,13 @@ export default function App() {
           <PuzzleSetupPanel
             puzzle={puzzle}
             solutionLimit={solutionLimit}
+            maxAddedBlueCircles={maxAddedBlueCircles}
             onVariantChange={changeVariant}
             onSizeChange={changeSize}
             onNameChange={setName}
             onDateChange={setCreatedAt}
             onSolutionLimitChange={setSolutionLimit}
+            onMaxAddedBlueCirclesChange={setMaxAddedBlueCircles}
           />
         </section>
 
@@ -281,8 +291,8 @@ export default function App() {
                   puzzle={puzzle}
                   eyebrow="2. Bolum"
                   title="Mavi Daireleri Kabul Eden Cozumler"
-                  description="Bu bolum, mavi daireleri zorunlu kabul eder; isaretlenmemis komsuluklar ise var ya da yok olabilir. Cikan yeni mavi daireler de burada gorunur."
-                  emptyMessage="Bu esnek yorum altinda cozum bulunamadi."
+                  description={`Bu bolum, mavi daireleri zorunlu kabul eder; isaretlenmemis komsuluklar ise var ya da yok olabilir. En fazla ${maxAddedBlueCircles} yeni mavi daireye izin verilir.`}
+                  emptyMessage="Bu esnek yorum altinda secilen mavi daire limitiyle cozum bulunamadi."
                   result={solveResult.relaxed}
                   selectedSolutionIndex={relaxedSolutionIndex}
                   showInferredMarkers={true}

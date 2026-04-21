@@ -96,7 +96,14 @@ def test_solve_detects_multiple_solutions() -> None:
 def test_consecutive_solve_returns_relaxed_solution_set() -> None:
     payload = build_consecutive_payload()
 
-    response = client.post("/api/solve", json={"puzzle": payload, "solution_limit": 12})
+    response = client.post(
+        "/api/solve",
+        json={
+            "puzzle": payload,
+            "solution_limit": 12,
+            "max_added_blue_circles": 144,
+        },
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -106,6 +113,24 @@ def test_consecutive_solve_returns_relaxed_solution_set() -> None:
     assert data["relaxed"]["is_unique"] is True
     assert data["relaxed"]["solution_count_found"] == 1
     assert data["relaxed"]["solutions"][0] == SOLVED_6X6
+
+
+def test_consecutive_solve_respects_blue_circle_limit() -> None:
+    payload = build_consecutive_payload()
+
+    response = client.post(
+        "/api/solve",
+        json={
+            "puzzle": payload,
+            "solution_limit": 12,
+            "max_added_blue_circles": 24,
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["relaxed"]["has_solution"] is False
+    assert data["relaxed"]["solution_count_found"] == 0
 
 
 def test_export_returns_pdf_bytes() -> None:

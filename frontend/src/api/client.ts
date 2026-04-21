@@ -54,10 +54,15 @@ export function validatePuzzle(puzzle: PuzzleDocument): Promise<ValidationRespon
 export function solvePuzzle(
   puzzle: PuzzleDocument,
   solutionLimit: number,
+  maxAddedBlueCircles: number,
 ): Promise<SolveResponse> {
   return requestJson<SolveResponse>('/api/solve', {
     method: 'POST',
-    body: JSON.stringify({ puzzle, solution_limit: solutionLimit }),
+    body: JSON.stringify({
+      puzzle,
+      solution_limit: solutionLimit,
+      max_added_blue_circles: maxAddedBlueCircles,
+    }),
   });
 }
 

@@ -9,4 +9,8 @@ router = APIRouter(prefix="/api", tags=["solve"])
 
 @router.post("/solve", response_model=SolveResponse)
 def solve_route(request: SolveRequest) -> SolveResponse:
-    return solve_puzzle_document(request.puzzle, request.solution_limit)
+    return solve_puzzle_document(
+        request.puzzle,
+        request.solution_limit,
+        request.max_added_blue_circles,
+    )

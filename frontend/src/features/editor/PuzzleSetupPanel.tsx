@@ -3,21 +3,25 @@ import type { PuzzleDocument, PuzzleSize, PuzzleVariant } from '../../domain/puz
 interface PuzzleSetupPanelProps {
   puzzle: PuzzleDocument;
   solutionLimit: number;
+  maxAddedBlueCircles: number;
   onVariantChange: (variant: PuzzleVariant) => void;
   onSizeChange: (size: PuzzleSize) => void;
   onNameChange: (name: string) => void;
   onDateChange: (date: string) => void;
   onSolutionLimitChange: (limit: number) => void;
+  onMaxAddedBlueCirclesChange: (limit: number) => void;
 }
 
 export default function PuzzleSetupPanel({
   puzzle,
   solutionLimit,
+  maxAddedBlueCircles,
   onVariantChange,
   onSizeChange,
   onNameChange,
   onDateChange,
   onSolutionLimitChange,
+  onMaxAddedBlueCirclesChange,
 }: PuzzleSetupPanelProps) {
   return (
     <div className="setup-grid">
@@ -88,6 +92,23 @@ export default function PuzzleSetupPanel({
           }}
         />
       </div>
+
+      {puzzle.variant === 'consecutive' ? (
+        <div className="setup-group">
+          <label className="field-label">Maks. ek mavi daire</label>
+          <input
+            className="text-input"
+            type="number"
+            min={0}
+            max={144}
+            value={maxAddedBlueCircles}
+            onChange={(event) => {
+              const parsed = Number.parseInt(event.target.value, 10);
+              onMaxAddedBlueCirclesChange(Number.isNaN(parsed) ? 0 : Math.max(0, Math.min(parsed, 144)));
+            }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

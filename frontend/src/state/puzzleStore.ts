@@ -11,10 +11,12 @@ import {
 } from '../domain/puzzle';
 
 export const DEFAULT_SOLUTION_LIMIT = 12;
+export const DEFAULT_MAX_ADDED_BLUE_CIRCLES = 144;
 
 export function usePuzzleStore() {
   const [puzzle, setPuzzle] = useState<PuzzleDocument>(() => createEmptyPuzzle('classic', 9));
   const [solutionLimit, setSolutionLimit] = useState(DEFAULT_SOLUTION_LIMIT);
+  const [maxAddedBlueCircles, setMaxAddedBlueCircles] = useState(DEFAULT_MAX_ADDED_BLUE_CIRCLES);
   const [approvedSolutionIndex, setApprovedSolutionIndex] = useState<number | null>(null);
 
   function changeVariant(variant: PuzzleVariant) {
@@ -52,6 +54,7 @@ export function usePuzzleStore() {
   return {
     puzzle,
     solutionLimit,
+    maxAddedBlueCircles,
     approvedSolutionIndex,
     changeVariant,
     changeSize,
@@ -60,6 +63,7 @@ export function usePuzzleStore() {
     setCell,
     toggleMarker,
     setSolutionLimit,
+    setMaxAddedBlueCircles,
     setApprovedSolutionIndex,
     resetApproval,
   };
