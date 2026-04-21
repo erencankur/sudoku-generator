@@ -10,6 +10,16 @@ export interface SolveResponse {
   is_unique: boolean;
   solutions: number[][][];
   validation: ValidationResponse;
+  relaxed?: SolveResultSet | null;
+}
+
+export interface SolveResultSet {
+  has_solution: boolean;
+  solution_count_found: number;
+  truncated: boolean;
+  is_unique: boolean;
+  solutions: number[][][];
+  validation: ValidationResponse;
 }
 
 export interface ExportRequest {

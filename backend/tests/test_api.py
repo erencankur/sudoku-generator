@@ -37,6 +37,17 @@ def build_classic_payload() -> dict:
     }
 
 
+def build_consecutive_payload() -> dict:
+    payload = build_classic_payload()
+    payload["variant"] = "consecutive"
+    payload["grid"] = [row[:] for row in SOLVED_6X6]
+    payload["consecutive_edges"] = {
+        "horizontal": [[False] * 5 for _ in range(6)],
+        "vertical": [[False] * 6 for _ in range(5)],
+    }
+    return payload
+
+
 def test_validate_returns_issue_for_duplicate() -> None:
     payload = build_classic_payload()
     payload["grid"][0][0] = 2
@@ -80,6 +91,21 @@ def test_solve_detects_multiple_solutions() -> None:
     assert data["has_solution"] is True
     assert data["is_unique"] is False
     assert data["solution_count_found"] >= 2
+
+
+def test_consecutive_solve_returns_relaxed_solution_set() -> None:
+    payload = build_consecutive_payload()
+
+    response = client.post("/api/solve", json={"puzzle": payload, "solution_limit": 12})
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["has_solution"] is False
+    assert data["solution_count_found"] == 0
+    assert data["relaxed"]["has_solution"] is True
+    assert data["relaxed"]["is_unique"] is True
+    assert data["relaxed"]["solution_count_found"] == 1
+    assert data["relaxed"]["solutions"][0] == SOLVED_6X6
 
 
 def test_export_returns_pdf_bytes() -> None:

@@ -32,6 +32,7 @@ def satisfies_adjacent_constraints(
     row: int,
     col: int,
     candidate: int,
+    allow_unmarked_consecutive: bool = False,
 ) -> bool:
     if puzzle.variant != "consecutive":
         return True
@@ -45,13 +46,19 @@ def satisfies_adjacent_constraints(
 
         if has_marker and not candidate_is_consecutive:
             return False
-        if not has_marker and candidate_is_consecutive:
+        if not has_marker and candidate_is_consecutive and not allow_unmarked_consecutive:
             return False
 
     return True
 
 
-def candidate_values(board: np.ndarray, puzzle: PuzzleDocument, row: int, col: int) -> list[int]:
+def candidate_values(
+    board: np.ndarray,
+    puzzle: PuzzleDocument,
+    row: int,
+    col: int,
+    allow_unmarked_consecutive: bool = False,
+) -> list[int]:
     if int(board[row, col]) != 0:
         return []
 
@@ -61,7 +68,14 @@ def candidate_values(board: np.ndarray, puzzle: PuzzleDocument, row: int, col: i
     for candidate in range(1, puzzle.size + 1):
         if candidate in disallowed:
             continue
-        if satisfies_adjacent_constraints(board, puzzle, row, col, candidate):
+        if satisfies_adjacent_constraints(
+            board,
+            puzzle,
+            row,
+            col,
+            candidate,
+            allow_unmarked_consecutive=allow_unmarked_consecutive,
+        ):
             candidates.append(candidate)
 
     return candidates

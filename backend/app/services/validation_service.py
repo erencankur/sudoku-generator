@@ -16,7 +16,10 @@ def _duplicates(values: list[int | None]) -> dict[int, list[int]]:
     return {value: indexes for value, indexes in seen.items() if len(indexes) > 1}
 
 
-def validate_puzzle(puzzle: PuzzleDocument) -> ValidationResponse:
+def validate_puzzle(
+    puzzle: PuzzleDocument,
+    allow_unmarked_consecutive: bool = False,
+) -> ValidationResponse:
     issues: list[ValidationIssue] = []
     size = puzzle.size
 
@@ -82,7 +85,7 @@ def validate_puzzle(puzzle: PuzzleDocument) -> ValidationResponse:
                             message="Marked adjacent cells must be consecutive.",
                         )
                     )
-                if not marker and consecutive:
+                if not marker and consecutive and not allow_unmarked_consecutive:
                     issues.append(
                         ValidationIssue(
                             type="non_consecutive_violation",
@@ -111,7 +114,7 @@ def validate_puzzle(puzzle: PuzzleDocument) -> ValidationResponse:
                             message="Marked adjacent cells must be consecutive.",
                         )
                     )
-                if not marker and consecutive:
+                if not marker and consecutive and not allow_unmarked_consecutive:
                     issues.append(
                         ValidationIssue(
                             type="non_consecutive_violation",

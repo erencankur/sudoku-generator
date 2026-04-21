@@ -38,7 +38,8 @@ export default function App() {
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [solveResult, setSolveResult] = useState<SolveResponse | null>(null);
-  const [selectedSolutionIndex, setSelectedSolutionIndex] = useState(0);
+  const [strictSolutionIndex, setStrictSolutionIndex] = useState(0);
+  const [relaxedSolutionIndex, setRelaxedSolutionIndex] = useState(0);
   const [isSolving, setIsSolving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [statusMessage, setStatusMessage] = useState(
@@ -56,7 +57,8 @@ export default function App() {
   useEffect(() => {
     resetApproval();
     setSolveResult(null);
-    setSelectedSolutionIndex(0);
+    setStrictSolutionIndex(0);
+    setRelaxedSolutionIndex(0);
     setStatusMessage('Bulmaca guncellendi. Cozum sonucunu yenilemek icin tekrar Cozum Yap kullanin.');
   }, [signature]);
 
@@ -101,11 +103,22 @@ export default function App() {
       const result = await solvePuzzle(puzzle, solutionLimit);
       setSolveResult(result);
       setServerIssues(result.validation.issues);
-      setSelectedSolutionIndex(0);
+      setStrictSolutionIndex(0);
+      setRelaxedSolutionIndex(0);
       resetApproval();
 
-      if (!result.has_solution) {
+      if (!result.has_solution && !result.relaxed?.has_solution) {
         setStatusMessage('Bu girdi ile gecerli bir cozum bulunamadi. Kurallari veya verilen sayilari gozden gecirin.');
+        return;
+      }
+
+      if (result.relaxed?.has_solution) {
+        if (!result.has_solution) {
+          setStatusMessage('Kesin yorumda cozum yok. Mavi daireli yorum icin cozumler hazir. Iki bolumu de asagida inceleyebilirsiniz.');
+          return;
+        }
+
+        setStatusMessage('Kesin yorum ve mavi daireli yorum icin cozumler hazir. Iki bolumu de asagida inceleyebilirsiniz.');
         return;
       }
 
@@ -133,7 +146,8 @@ export default function App() {
     }
 
     setApprovedSolutionIndex(0);
-    setSelectedSolutionIndex(0);
+    setStrictSolutionIndex(0);
+    setRelaxedSolutionIndex(0);
     setStatusMessage('Bulmaca onaylandi. PDF export artik kullanilabilir.');
   }
 
@@ -235,17 +249,49 @@ export default function App() {
         </section>
 
         {solveResult ? (
-          <section className="paper-card">
-            <SolutionTabs
-              puzzle={puzzle}
-              solveResult={solveResult}
-              selectedSolutionIndex={selectedSolutionIndex}
-              onSelectSolution={(index) => {
-                setSelectedSolutionIndex(index);
-                setStatusMessage(`Cozum ${index + 1} goruntuleniyor.`);
-              }}
-            />
-          </section>
+          <>
+            <section className="paper-card">
+              <SolutionTabs
+                puzzle={puzzle}
+                eyebrow={puzzle.variant === 'consecutive' ? '1. Bolum' : 'Tum Cozumler'}
+                title={puzzle.variant === 'consecutive' ? 'Mevcut Tabloya Gore Cozumler' : 'Bulunan Cozumleri Incele'}
+                description={
+                  puzzle.variant === 'consecutive'
+                    ? 'Bu bolum, girdiginiz tabloyu ve mavi daireleri mevcut haliyle birebir kabul eder.'
+                    : 'Bu bolum, bulunan tum cozumleri mevcut tablo kurallariyla listeler.'
+                }
+                emptyMessage={
+                  puzzle.variant === 'consecutive'
+                    ? 'Bu kesin yorum altinda cozum bulunamadi.'
+                    : 'Bu bulmaca icin cozum bulunamadi.'
+                }
+                result={solveResult}
+                selectedSolutionIndex={strictSolutionIndex}
+                onSelectSolution={(index) => {
+                  setStrictSolutionIndex(index);
+                  setStatusMessage(`Kesin yorumda Cozum ${index + 1} goruntuleniyor.`);
+                }}
+              />
+            </section>
+
+            {solveResult.relaxed ? (
+              <section className="paper-card">
+                <SolutionTabs
+                  puzzle={puzzle}
+                  eyebrow="2. Bolum"
+                  title="Mavi Daireleri Kabul Eden Cozumler"
+                  description="Bu bolum, mavi daireleri zorunlu kabul eder; isaretlenmemis komsuluklar ise var ya da yok olabilir."
+                  emptyMessage="Bu esnek yorum altinda cozum bulunamadi."
+                  result={solveResult.relaxed}
+                  selectedSolutionIndex={relaxedSolutionIndex}
+                  onSelectSolution={(index) => {
+                    setRelaxedSolutionIndex(index);
+                    setStatusMessage(`Esnek yorumda Cozum ${index + 1} goruntuleniyor.`);
+                  }}
+                />
+              </section>
+            ) : null}
+          </>
         ) : null}
 
         {canExport ? (

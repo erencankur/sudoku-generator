@@ -1,13 +1,12 @@
 from ..schemas.puzzle import PuzzleDocument
-from ..schemas.solve import SolveResponse
-from .validation_service import validate_puzzle
+from ..schemas.solve import SolveResponse, SolveResultSet
 from ..solver.backtracking import enumerate_solutions
+from .validation_service import validate_puzzle
 
 
-def solve_puzzle_document(puzzle: PuzzleDocument, solution_limit: int) -> SolveResponse:
-    validation = validate_puzzle(puzzle)
-    if not validation.is_valid:
-        return SolveResponse(
+def _build_result_set(validation, enumeration) -> SolveResultSet:
+    if enumeration is None:
+        return SolveResultSet(
             has_solution=False,
             solution_count_found=0,
             truncated=False,
@@ -16,10 +15,8 @@ def solve_puzzle_document(puzzle: PuzzleDocument, solution_limit: int) -> SolveR
             validation=validation,
         )
 
-    enumeration = enumerate_solutions(puzzle, solution_limit)
     solution_count = enumeration.found_count
-
-    return SolveResponse(
+    return SolveResultSet(
         has_solution=solution_count > 0,
         solution_count_found=solution_count,
         truncated=enumeration.truncated,
@@ -27,4 +24,30 @@ def solve_puzzle_document(puzzle: PuzzleDocument, solution_limit: int) -> SolveR
         solutions=enumeration.solutions,
         validation=validation,
     )
+
+
+def solve_puzzle_document(puzzle: PuzzleDocument, solution_limit: int) -> SolveResponse:
+    strict_validation = validate_puzzle(puzzle)
+    strict_enumeration = (
+        enumerate_solutions(puzzle, solution_limit)
+        if strict_validation.is_valid
+        else None
+    )
+    strict_result = _build_result_set(strict_validation, strict_enumeration)
+
+    relaxed_result = None
+    if puzzle.variant == "consecutive":
+        relaxed_validation = validate_puzzle(puzzle, allow_unmarked_consecutive=True)
+        relaxed_enumeration = (
+            enumerate_solutions(
+                puzzle,
+                solution_limit,
+                allow_unmarked_consecutive=True,
+            )
+            if relaxed_validation.is_valid
+            else None
+        )
+        relaxed_result = _build_result_set(relaxed_validation, relaxed_enumeration)
+
+    return SolveResponse(**strict_result.model_dump(), relaxed=relaxed_result)
 

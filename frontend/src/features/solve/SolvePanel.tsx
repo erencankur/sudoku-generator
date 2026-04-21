@@ -1,4 +1,4 @@
-import type { SolveResponse } from '../../api/client';
+import type { SolveResponse, SolveResultSet } from '../../api/client';
 
 interface SolvePanelProps {
   isSolving: boolean;
@@ -17,19 +17,40 @@ function buildSummary(solveResult: SolveResponse | null): string {
     return 'Cozum sonucu henuz olusturulmadi.';
   }
 
-  if (!solveResult.has_solution) {
-    return 'Cozum yok.';
+  const relaxedResult = solveResult.relaxed;
+
+  if (!solveResult.has_solution && !relaxedResult?.has_solution) {
+    return 'Her iki yorumda da cozum yok.';
   }
 
-  if (solveResult.is_unique) {
-    return 'Tek cozum bulundu.';
+  function summarizeSet(label: string, result: SolveResultSet | null | undefined): string | null {
+    if (!result) {
+      return null;
+    }
+
+    if (!result.has_solution) {
+      return `${label} yorumunda cozum yok.`;
+    }
+
+    if (result.is_unique) {
+      return `${label} yorumunda tek cozum bulundu.`;
+    }
+
+    if (result.truncated) {
+      return `${label} yorumunda en az ${result.solution_count_found} cozum bulundu ve limit doldu.`;
+    }
+
+    return `${label} yorumunda ${result.solution_count_found} farkli cozum bulundu.`;
   }
 
-  if (solveResult.truncated) {
-    return `En az ${solveResult.solution_count_found} cozum bulundu ve limit doldu.`;
+  const strictSummary = summarizeSet('Kesin', solveResult);
+  const relaxedSummary = summarizeSet('Mavi daireli', relaxedResult);
+
+  if (relaxedSummary) {
+    return [strictSummary, relaxedSummary].filter(Boolean).join(' ');
   }
 
-  return `${solveResult.solution_count_found} farkli cozum bulundu.`;
+  return strictSummary ?? 'Cozum yok.';
 }
 
 export default function SolvePanel({
@@ -43,7 +64,7 @@ export default function SolvePanel({
   onContinueEditing,
   onApprove,
 }: SolvePanelProps) {
-  const showContinue = Boolean(solveResult?.has_solution);
+  const showContinue = Boolean(solveResult?.has_solution || solveResult?.relaxed?.has_solution);
   const showApprove = Boolean(solveResult?.is_unique);
 
   return (

@@ -9,10 +9,14 @@ class SolveRequest(BaseModel):
     solution_limit: int = Field(default=12, ge=1, le=128)
 
 
-class SolveResponse(BaseModel):
+class SolveResultSet(BaseModel):
     has_solution: bool
     solution_count_found: int
     truncated: bool
     is_unique: bool
     solutions: list[list[list[int]]] = Field(default_factory=list)
     validation: ValidationResponse
+
+
+class SolveResponse(SolveResultSet):
+    relaxed: SolveResultSet | None = None

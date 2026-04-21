@@ -303,6 +303,16 @@
   padding: 1px;
 }
 
+.solution-empty-state {
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed rgba(64, 53, 45, 0.18);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
 .solution-cell {
   aspect-ratio: 1;
   display: grid;
@@ -310,6 +320,31 @@
   background: rgba(255, 255, 255, 0.92);
   font-family: "Iowan Old Style", "Palatino Linotype", serif;
   font-size: 1.05rem;
+  position: relative;
+}
+
+.solution-edge {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(69, 111, 149, 0.88);
+  background: rgba(110, 145, 180, 0.96);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.solution-edge-horizontal {
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.solution-edge-vertical {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .common-parts-panel {
