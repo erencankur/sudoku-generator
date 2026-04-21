@@ -1,4 +1,5 @@
 import type { SolveResponse, SolveResultSet } from '../../api/client';
+import { useI18n } from '../../i18n';
 
 interface SolvePanelProps {
   isSolving: boolean;
@@ -12,15 +13,15 @@ interface SolvePanelProps {
   onApprove: () => void;
 }
 
-function buildSummary(solveResult: SolveResponse | null): string {
+function buildSummary(copy: ReturnType<typeof useI18n>['copy'], solveResult: SolveResponse | null): string {
   if (!solveResult) {
-    return 'Cozum sonucu henuz olusturulmadi.';
+    return copy.solvePanel.summary.noResult;
   }
 
   const relaxedResult = solveResult.relaxed;
 
   if (!solveResult.has_solution && !relaxedResult?.has_solution) {
-    return 'Her iki yorumda da cozum yok.';
+    return copy.solvePanel.summary.noSolution;
   }
 
   function summarizeSet(label: string, result: SolveResultSet | null | undefined): string | null {
@@ -29,28 +30,28 @@ function buildSummary(solveResult: SolveResponse | null): string {
     }
 
     if (!result.has_solution) {
-      return `${label} yorumunda cozum yok.`;
+      return `${label}: ${copy.solvePanel.summary.noSolution}`;
     }
 
     if (result.is_unique) {
-      return `${label} yorumunda tek cozum bulundu.`;
+      return `${label}: ${copy.solvePanel.summary.unique}`;
     }
 
     if (result.truncated) {
-      return `${label} yorumunda en az ${result.solution_count_found} cozum bulundu ve limit doldu.`;
+      return `${label}: ${copy.solvePanel.summary.truncated(result.solution_count_found)}`;
     }
 
-    return `${label} yorumunda ${result.solution_count_found} farkli cozum bulundu.`;
+    return `${label}: ${copy.solvePanel.summary.multiple(result.solution_count_found)}`;
   }
 
-  const strictSummary = summarizeSet('Kesin', solveResult);
-  const relaxedSummary = summarizeSet('Mavi daireli', relaxedResult);
+  const strictSummary = summarizeSet(copy.solvePanel.resultLabels.strict, solveResult);
+  const relaxedSummary = summarizeSet(copy.solvePanel.resultLabels.relaxed, relaxedResult);
 
   if (relaxedSummary) {
     return [strictSummary, relaxedSummary].filter(Boolean).join(' ');
   }
 
-  return strictSummary ?? 'Cozum yok.';
+  return strictSummary ?? copy.solvePanel.summary.noSolution;
 }
 
 export default function SolvePanel({
@@ -64,6 +65,7 @@ export default function SolvePanel({
   onContinueEditing,
   onApprove,
 }: SolvePanelProps) {
+  const { copy } = useI18n();
   const showContinue = Boolean(solveResult?.has_solution || solveResult?.relaxed?.has_solution);
   const showApprove = Boolean(solveResult?.is_unique);
 
@@ -71,38 +73,38 @@ export default function SolvePanel({
     <div className="solve-panel">
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">Solve Karari</p>
-          <h2>Cozum Sonrasi Akis</h2>
+          <p className="eyebrow">{copy.solvePanel.eyebrow}</p>
+          <h2>{copy.solvePanel.title}</h2>
         </div>
         <div className="status-stack">
           <span className={issueCount > 0 ? 'issue-chip issue-chip-active' : 'issue-chip'}>
-            {issueCount} issue
+            {issueCount} {copy.solvePanel.issueLabel}
           </span>
           <span className={isValidating ? 'issue-chip issue-chip-active' : 'issue-chip'}>
-            {isValidating ? 'Dogrulaniyor' : 'Hazir'}
+            {isValidating ? copy.solvePanel.validatingLabel : copy.solvePanel.readyLabel}
           </span>
         </div>
       </div>
 
       <p className="supporting-copy">{statusMessage}</p>
-      <p className="solve-summary">{buildSummary(solveResult)}</p>
+      <p className="solve-summary">{buildSummary(copy, solveResult)}</p>
 
       {validationError ? <p className="error-text">{validationError}</p> : null}
 
       <div className="actions-row">
         <button type="button" className="primary-button" onClick={onSolve} disabled={isSolving}>
-          {isSolving ? 'Cozuluyor...' : 'Cozum Yap'}
+          {isSolving ? copy.solvePanel.solvingButton : copy.solvePanel.solveButton}
         </button>
 
         {showContinue ? (
           <button type="button" className="secondary-button" onClick={onContinueEditing}>
-            Soruyu Gelistirmeye Devam Et
+            {copy.solvePanel.continueButton}
           </button>
         ) : null}
 
         {showApprove ? (
           <button type="button" className="accent-button" onClick={onApprove}>
-            Soruyu Onayla
+            {copy.solvePanel.approveButton}
           </button>
         ) : null}
       </div>

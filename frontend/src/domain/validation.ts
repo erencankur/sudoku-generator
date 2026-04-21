@@ -1,4 +1,5 @@
 import type { CellCoordinate, EdgeCoordinate, PuzzleDocument } from './puzzle';
+import { getValidationMessages, type Language } from '../i18n';
 
 export type ValidationIssueType =
   | 'row_duplicate'
@@ -20,7 +21,7 @@ export interface ValidationResponse {
 }
 
 function issueKey(issue: ValidationIssue): string {
-  return JSON.stringify(issue);
+  return JSON.stringify({ type: issue.type, cells: issue.cells, edges: issue.edges });
 }
 
 function findDuplicates(values: Array<number | null>): Map<number, number[]> {
@@ -53,9 +54,10 @@ export function mergeIssues(...groups: ValidationIssue[][]): ValidationIssue[] {
   return [...merged.values()];
 }
 
-export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationResponse {
+export function validatePuzzleDocument(puzzle: PuzzleDocument, language: Language = 'tr'): ValidationResponse {
   const issues: ValidationIssue[] = [];
   const { size, grid, region_shape: regionShape } = puzzle;
+  const messages = getValidationMessages(language);
 
   for (let row = 0; row < size; row += 1) {
     const duplicates = findDuplicates(grid[row]);
@@ -65,7 +67,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
         type: 'row_duplicate',
         cells: indexes.map((col) => [row, col]),
         edges: [],
-        message: `${value} ayni satirda tekrar ediyor.`,
+        message: messages.rowDuplicate(value),
       });
     });
   }
@@ -79,7 +81,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
         type: 'column_duplicate',
         cells: indexes.map((row) => [row, col]),
         edges: [],
-        message: `${value} ayni sutunda tekrar ediyor.`,
+        message: messages.columnDuplicate(value),
       });
     });
   }
@@ -107,7 +109,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
             type: 'region_duplicate',
             cells,
             edges: [],
-            message: `${value} ayni bolgede tekrar ediyor.`,
+            message: messages.regionDuplicate(value),
           });
         }
       });
@@ -135,7 +137,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
               [row, col + 1],
             ],
             edges: [{ orientation: 'horizontal', row, col }],
-            message: 'Isaretli komsu hucreler ardısık olmali.',
+            message: messages.consecutiveViolation,
           });
         }
 
@@ -147,7 +149,19 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
               [row, col + 1],
             ],
             edges: [{ orientation: 'horizontal', row, col }],
-            message: 'Isaretsiz komsu hucreler ardısık olamaz.',
+            message: messages.nonConsecutiveViolation,
+          });
+        }
+
+        if (marker === 0 && isConsecutive) {
+          addIssue(issues, {
+            type: 'non_consecutive_violation',
+            cells: [
+              [row, col],
+              [row, col + 1],
+            ],
+            edges: [{ orientation: 'horizontal', row, col }],
+            message: messages.nonConsecutiveViolation,
           });
         }
       }
@@ -173,7 +187,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
               [row + 1, col],
             ],
             edges: [{ orientation: 'vertical', row, col }],
-            message: 'Isaretli komsu hucreler ardısık olmali.',
+            message: messages.consecutiveViolation,
           });
         }
 
@@ -185,7 +199,19 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
               [row + 1, col],
             ],
             edges: [{ orientation: 'vertical', row, col }],
-            message: 'Isaretsiz komsu hucreler ardısık olamaz.',
+            message: messages.nonConsecutiveViolation,
+          });
+        }
+
+        if (marker === 0 && isConsecutive) {
+          addIssue(issues, {
+            type: 'non_consecutive_violation',
+            cells: [
+              [row, col],
+              [row + 1, col],
+            ],
+            edges: [{ orientation: 'vertical', row, col }],
+            message: messages.nonConsecutiveViolation,
           });
         }
       }

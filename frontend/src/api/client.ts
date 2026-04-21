@@ -1,5 +1,6 @@
 import type { PuzzleDocument } from '../domain/puzzle';
 import type { ValidationResponse } from '../domain/validation';
+import type { Language } from '../i18n';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
 
@@ -26,6 +27,7 @@ export interface ExportRequest {
   puzzle: PuzzleDocument;
   approved_solution: number[][];
   solution_index: number;
+  language: Language;
 }
 
 async function requestJson<T>(path: string, init: RequestInit): Promise<T> {

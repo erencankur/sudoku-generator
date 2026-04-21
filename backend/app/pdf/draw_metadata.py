@@ -7,9 +7,29 @@ from .layout import PdfLayout
 from ..schemas.puzzle import PuzzleDocument
 
 
-def draw_metadata(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLayout, subtitle: str) -> None:
+def _localized_pdf_copy(language: str) -> dict[str, str]:
+    if language == "en":
+        return {
+            "classic_prefix": "Classic Sudoku by",
+            "consecutive_prefix": "Consecutive Pairs Sudoku by",
+            "board_label_classic": "Classic",
+            "board_label_consecutive": "Checkered",
+            "footer_text": "Sudoku Generator",
+        }
+
+    return {
+        "classic_prefix": "Klasik Sudoku by",
+        "consecutive_prefix": "Ardisik Ciftler Sudoku by",
+        "board_label_classic": "Classic",
+        "board_label_consecutive": "Checkered",
+        "footer_text": "Sudoku Uretici",
+    }
+
+
+def draw_metadata(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLayout, subtitle: str, language: str) -> None:
     canvas.setFillColor(colors.HexColor("#1f1a17"))
-    title_prefix = "Consecutive Pairs Sudoku by" if puzzle.variant == "consecutive" else "Classic Sudoku by"
+    localized = _localized_pdf_copy(language)
+    title_prefix = localized["consecutive_prefix"] if puzzle.variant == "consecutive" else localized["classic_prefix"]
     prefix_font = "Helvetica"
     prefix_size = 20
     name_font = "Helvetica-Bold"
@@ -36,9 +56,13 @@ def draw_metadata(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLayout, sub
     canvas.line(18 * mm, layout.footer_rule_y, layout.page_width - 18 * mm, layout.footer_rule_y)
 
     canvas.setFont("Helvetica-Oblique", 13)
-    canvas.drawString(layout.board_origin_x, layout.label_y, "Classic" if puzzle.variant == "classic" else "Checkered")
+    canvas.drawString(
+        layout.board_origin_x,
+        layout.label_y,
+        localized["board_label_classic"] if puzzle.variant == "classic" else localized["board_label_consecutive"],
+    )
     canvas.drawRightString(layout.board_origin_x + layout.board_size, layout.label_y, f"{{1-{puzzle.size}}}")
 
     canvas.setFont("Helvetica", 9.5)
-    canvas.drawString(18 * mm, layout.footer_text_y, "Sudoku Generator")
+    canvas.drawString(18 * mm, layout.footer_text_y, localized["footer_text"])
     canvas.drawRightString(layout.page_width - 18 * mm, layout.footer_text_y, puzzle.created_at)

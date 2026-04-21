@@ -37,8 +37,8 @@ const REGION_SHAPES: Record<PuzzleSize, RegionShape> = {
 };
 
 const DEFAULT_NAMES: Record<PuzzleVariant, string> = {
-  classic: 'Klasik Sudoku',
-  consecutive: 'Ardisik Sudoku',
+  classic: 'Classic Sudoku',
+  consecutive: 'Consecutive Sudoku',
 };
 
 function createEdgeStateMatrix(rows: number, cols: number): ConsecutiveEdgeState[][] {

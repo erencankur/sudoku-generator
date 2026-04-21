@@ -1,4 +1,5 @@
 import type { PuzzleDocument, PuzzleSize, PuzzleVariant } from '../../domain/puzzle';
+import { useI18n } from '../../i18n';
 
 interface PuzzleSetupPanelProps {
   puzzle: PuzzleDocument;
@@ -23,21 +24,23 @@ export default function PuzzleSetupPanel({
   onSolutionLimitChange,
   onMaxAddedBlueCirclesChange,
 }: PuzzleSetupPanelProps) {
+  const { copy } = useI18n();
+
   return (
     <div className="setup-grid">
       <div className="setup-group">
-        <label className="field-label">Bulmaca adi</label>
+        <label className="field-label">{copy.puzzleSetup.nameLabel}</label>
         <input
           className="text-input"
           type="text"
           value={puzzle.name}
           onChange={(event) => onNameChange(event.target.value)}
-          placeholder="Bulmaca basligi"
+          placeholder={copy.puzzleSetup.namePlaceholder}
         />
       </div>
 
       <div className="setup-group">
-        <label className="field-label">Olusturma tarihi</label>
+        <label className="field-label">{copy.puzzleSetup.dateLabel}</label>
         <input
           className="text-input"
           type="date"
@@ -47,7 +50,7 @@ export default function PuzzleSetupPanel({
       </div>
 
       <div className="setup-group">
-        <label className="field-label">Variant secimi</label>
+        <label className="field-label">{copy.puzzleSetup.variantLabel}</label>
         <div className="segmented-control">
           {(['classic', 'consecutive'] as const).map((variant) => (
             <button
@@ -56,14 +59,14 @@ export default function PuzzleSetupPanel({
               className={variant === puzzle.variant ? 'segment active' : 'segment'}
               onClick={() => onVariantChange(variant)}
             >
-              {variant === 'classic' ? 'Classic' : 'Consecutive'}
+              {variant === 'classic' ? copy.puzzleSetup.classicVariant : copy.puzzleSetup.consecutiveVariant}
             </button>
           ))}
         </div>
       </div>
 
       <div className="setup-group">
-        <label className="field-label">Grid boyutu</label>
+        <label className="field-label">{copy.puzzleSetup.gridSizeLabel}</label>
         <div className="segmented-control">
           {([6, 9] as const).map((size) => (
             <button
@@ -79,7 +82,7 @@ export default function PuzzleSetupPanel({
       </div>
 
       <div className="setup-group">
-        <label className="field-label">Cozum limiti</label>
+        <label className="field-label">{copy.puzzleSetup.solutionLimitLabel}</label>
         <input
           className="text-input"
           type="number"
@@ -95,7 +98,7 @@ export default function PuzzleSetupPanel({
 
       {puzzle.variant === 'consecutive' ? (
         <div className="setup-group">
-          <label className="field-label">Maks. ek mavi daire</label>
+          <label className="field-label">{copy.puzzleSetup.maxBlueCirclesLabel}</label>
           <input
             className="text-input"
             type="number"

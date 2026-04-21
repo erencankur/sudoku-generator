@@ -3,10 +3,12 @@ import { exportPuzzlePdf, solvePuzzle, validatePuzzle, type SolveResponse } from
 import { boardSignature, getRangeLabel } from './domain/puzzle';
 import { mergeIssues, validatePuzzleDocument, type ValidationIssue } from './domain/validation';
 import ExportPanel from './features/export/ExportPanel';
+import LanguageSwitcher from './features/language/LanguageSwitcher';
 import PuzzleSetupPanel from './features/editor/PuzzleSetupPanel';
 import SudokuGrid from './features/editor/SudokuGrid';
 import SolutionTabs from './features/solve/SolutionTabs';
 import SolvePanel from './features/solve/SolvePanel';
+import { formatStatusMessage, type StatusState, useI18n } from './i18n';
 import { usePuzzleStore } from './state/puzzleStore';
 
 function sanitizeFileName(name: string): string {
@@ -18,6 +20,7 @@ function sanitizeFileName(name: string): string {
 }
 
 export default function App() {
+  const { language, copy } = useI18n();
   const store = usePuzzleStore();
   const {
     puzzle,
@@ -44,13 +47,12 @@ export default function App() {
   const [relaxedSolutionIndex, setRelaxedSolutionIndex] = useState(0);
   const [isSolving, setIsSolving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState(
-    'Bulmacayi hazirlayin. Cozumden sonra karar butonlari otomatik olarak duruma gore gorunecek.',
-  );
+  const [statusState, setStatusState] = useState<StatusState>({ key: 'initial' });
 
   const signature = boardSignature(puzzle);
+  const statusMessage = useMemo(() => formatStatusMessage(language, statusState), [language, statusState]);
 
-  const clientValidation = useMemo(() => validatePuzzleDocument(puzzle), [signature]);
+  const clientValidation = useMemo(() => validatePuzzleDocument(puzzle, language), [signature, language]);
   const issues = useMemo(
     () => mergeIssues(clientValidation.issues, serverIssues),
     [clientValidation, serverIssues],
@@ -61,7 +63,7 @@ export default function App() {
     setSolveResult(null);
     setStrictSolutionIndex(0);
     setRelaxedSolutionIndex(0);
-    setStatusMessage('Bulmaca guncellendi. Cozum sonucunu yenilemek icin tekrar Cozum Yap kullanin.');
+    setStatusState({ key: 'puzzleUpdated' });
   }, [signature]);
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function App() {
         }
       } catch (error) {
         if (!ignore) {
-          setValidationError(error instanceof Error ? error.message : 'Sunucu dogrulamasi basarisiz.');
+          setValidationError(error instanceof Error ? error.message : copy.errors.serverValidationFailed);
         }
       } finally {
         if (!ignore) {
@@ -90,7 +92,7 @@ export default function App() {
       ignore = true;
       window.clearTimeout(timer);
     };
-  }, [puzzle, signature]);
+  }, [puzzle, signature, copy]);
 
   const approvedSolution =
     solveResult && approvedSolutionIndex !== null ? solveResult.solutions[approvedSolutionIndex] : null;
@@ -110,34 +112,28 @@ export default function App() {
       resetApproval();
 
       if (!result.has_solution && !result.relaxed?.has_solution) {
-        setStatusMessage(
-          'Bu girdi ile gecerli bir cozum bulunamadi. Mavi daire limiti cok dusukse esnek yorum da bos kalabilir.',
-        );
+        setStatusState({ key: 'noSolution' });
         return;
       }
 
       if (result.relaxed?.has_solution) {
         if (!result.has_solution) {
-          setStatusMessage(
-            `Kesin yorumda cozum yok. Mavi daireli yorum icin en fazla ${maxAddedBlueCircles} yeni daireye izin verildi. Iki bolumu de asagida inceleyebilirsiniz.`,
-          );
+          setStatusState({ key: 'strictNoSolutionRelaxedPossible', limit: maxAddedBlueCircles });
           return;
         }
 
-        setStatusMessage(
-          `Kesin yorum ve mavi daireli yorum icin cozumler hazir. En fazla ${maxAddedBlueCircles} yeni mavi daireye izin verildi.`,
-        );
+        setStatusState({ key: 'bothResultSetsReady', limit: maxAddedBlueCircles });
         return;
       }
 
       if (result.is_unique) {
-        setStatusMessage('Tek cozum bulundu. Isterseniz Soruyu Gelistirmeye Devam Et ile geri donebilir ya da Soruyu Onayla ile export akisini acabilirsiniz.');
+        setStatusState({ key: 'strictUnique' });
         return;
       }
 
-      setStatusMessage('Birden fazla cozum bulundu. Tek buton olarak Soruyu Gelistirmeye Devam Et gorunur; bulmacayi daha belirgin hale getirmeniz gerekir.');
+      setStatusState({ key: 'strictMultiple' });
     } catch (error) {
-      setValidationError(error instanceof Error ? error.message : 'Cozum istegi basarisiz.');
+      setValidationError(error instanceof Error ? error.message : copy.errors.solveRequestFailed);
     } finally {
       setIsSolving(false);
     }
@@ -145,7 +141,7 @@ export default function App() {
 
   function handleContinueEditing() {
     resetApproval();
-    setStatusMessage('Editor moduna geri donuldu. Grid uzerinde sayi veya ardısik isaretleri ekleyerek bulmacayi gelistirebilirsiniz.');
+    setStatusState({ key: 'continueEditing' });
   }
 
   function handleApprove() {
@@ -156,7 +152,7 @@ export default function App() {
     setApprovedSolutionIndex(0);
     setStrictSolutionIndex(0);
     setRelaxedSolutionIndex(0);
-    setStatusMessage('Bulmaca onaylandi. PDF export artik kullanilabilir.');
+    setStatusState({ key: 'approved' });
   }
 
   async function handleExport() {
@@ -171,6 +167,7 @@ export default function App() {
         puzzle,
         approved_solution: approvedSolution,
         solution_index: approvedSolutionIndex ?? 0,
+        language,
       });
 
       const url = URL.createObjectURL(blob);
@@ -179,9 +176,9 @@ export default function App() {
       anchor.download = `${sanitizeFileName(puzzle.name)}.pdf`;
       anchor.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 0);
-      setStatusMessage('PDF indirilmeye hazirlandi. Tasarim examplesudoku.png referansina gore uretildi.');
+      setStatusState({ key: 'exportReady' });
     } catch (error) {
-      setValidationError(error instanceof Error ? error.message : 'PDF export basarisiz.');
+      setValidationError(error instanceof Error ? error.message : copy.errors.pdfExportFailed);
     } finally {
       setIsExporting(false);
     }
@@ -190,23 +187,24 @@ export default function App() {
   return (
     <div className="app-shell">
       <aside className="reference-panel paper-card">
-        <p className="eyebrow">Referans Goruntu</p>
-        <h2>PDF Tasarim Yonelimi</h2>
-        <p className="supporting-copy">
-          Uretilen puzzle ve cozum sayfalari, asagidaki gorseldeki kagit duzeni, ince cizgi dili ve merkezlenmis kompozisyonu referans alir.
-        </p>
+        <p className="eyebrow">{copy.app.referenceEyebrow}</p>
+        <h2>{copy.app.referenceTitle}</h2>
+        <p className="supporting-copy">{copy.app.referenceCopy}</p>
         <img className="reference-image" src="/examplesudoku.png" alt="Sudoku export reference" />
       </aside>
 
       <main className="workspace">
         <header className="hero paper-card">
-          <p className="eyebrow">Local Sudoku Generator</p>
-          <h1>Kural Kur, Coz, Onayla, PDF Al</h1>
-          <p className="supporting-copy">
-            Klasik ve ardısik sudoku bulmacalari icin ayni editor kullanilir. Solve sonucu tek cozum verirse iki karar butonu, birden fazla cozum verirse yalnizca gelistirme butonu acilir.
-          </p>
+          <div className="hero-topbar">
+            <div>
+              <p className="eyebrow">{copy.app.heroEyebrow}</p>
+              <h1>{copy.app.heroTitle}</h1>
+            </div>
+            <LanguageSwitcher />
+          </div>
+          <p className="supporting-copy">{copy.app.heroCopy}</p>
           <div className="hero-meta">
-            <span>{puzzle.variant === 'classic' ? 'Klasik mod' : 'Ardisik mod'}</span>
+            <span>{puzzle.variant === 'classic' ? copy.app.classicMode : copy.app.consecutiveMode}</span>
             <span>{puzzle.size}x{puzzle.size}</span>
             <span>{getRangeLabel(puzzle)}</span>
           </div>
@@ -229,15 +227,15 @@ export default function App() {
         <section className="paper-card board-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Editor</p>
-              <h2>Grid ve Kenar Isaretleri</h2>
+              <p className="eyebrow">{copy.app.editorEyebrow}</p>
+              <h2>{copy.app.editorTitle}</h2>
             </div>
             <div className="issue-summary">
               <span className={issues.length > 0 ? 'issue-chip issue-chip-active' : 'issue-chip'}>
-                {issues.length} issue
+                {issues.length} {copy.solvePanel.issueLabel}
               </span>
               <span className={isValidating ? 'issue-chip issue-chip-active' : 'issue-chip'}>
-                {isValidating ? 'Sunucu kontrolu' : 'Client + server kontrolu'}
+                {isValidating ? copy.solvePanel.validatingLabel : copy.solvePanel.readyLabel}
               </span>
             </div>
           </div>
@@ -263,24 +261,16 @@ export default function App() {
             <section className="paper-card">
               <SolutionTabs
                 puzzle={puzzle}
-                eyebrow={puzzle.variant === 'consecutive' ? '1. Bolum' : 'Tum Cozumler'}
-                title={puzzle.variant === 'consecutive' ? 'Mevcut Tabloya Gore Cozumler' : 'Bulunan Cozumleri Incele'}
-                description={
-                  puzzle.variant === 'consecutive'
-                    ? 'Bu bolum, bos biraktiginiz daireleri daire yok olarak kabul eder.'
-                    : 'Bu bolum, bulunan tum cozumleri mevcut tablo kurallariyla listeler.'
-                }
-                emptyMessage={
-                  puzzle.variant === 'consecutive'
-                    ? 'Bu kesin yorum altinda cozum bulunamadi.'
-                    : 'Bu bulmaca icin cozum bulunamadi.'
-                }
+                eyebrow={copy.solutionTabs.strictEyebrow}
+                title={copy.solutionTabs.strictTitle}
+                description={copy.solutionTabs.strictDescription}
+                emptyMessage={copy.solutionTabs.strictEmpty}
                 result={solveResult}
                 selectedSolutionIndex={strictSolutionIndex}
                 showInferredMarkers={false}
                 onSelectSolution={(index) => {
                   setStrictSolutionIndex(index);
-                  setStatusMessage(`Kesin yorumda Cozum ${index + 1} goruntuleniyor.`);
+                  setStatusState({ key: 'strictSolutionSelected', index: index + 1 });
                 }}
               />
             </section>
@@ -289,16 +279,16 @@ export default function App() {
               <section className="paper-card">
                 <SolutionTabs
                   puzzle={puzzle}
-                  eyebrow="2. Bolum"
-                  title="Mavi Daireleri Kabul Eden Cozumler"
-                    description={`Bu bolum, bos biraktiginiz daireler icin hem daire yok hem daire var durumlarini dener. En fazla ${maxAddedBlueCircles} yeni mavi daireye izin verilir.`}
-                  emptyMessage="Bu esnek yorum altinda secilen mavi daire limitiyle cozum bulunamadi."
+                  eyebrow={copy.solutionTabs.relaxedEyebrow}
+                  title={copy.solutionTabs.relaxedTitle}
+                  description={copy.solutionTabs.relaxedDescription(maxAddedBlueCircles)}
+                  emptyMessage={copy.solutionTabs.relaxedEmpty}
                   result={solveResult.relaxed}
                   selectedSolutionIndex={relaxedSolutionIndex}
                   showInferredMarkers={true}
                   onSelectSolution={(index) => {
                     setRelaxedSolutionIndex(index);
-                    setStatusMessage(`Esnek yorumda Cozum ${index + 1} goruntuleniyor.`);
+                    setStatusState({ key: 'relaxedSolutionSelected', index: index + 1 });
                   }}
                 />
               </section>

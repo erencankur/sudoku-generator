@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { SolveResultSet } from '../../api/client';
 import type { ConsecutiveEdgeState, PuzzleDocument } from '../../domain/puzzle';
+import { useI18n } from '../../i18n';
 
 interface SolutionTabsProps {
   puzzle: PuzzleDocument;
@@ -25,6 +26,7 @@ export default function SolutionTabs({
   onSelectSolution,
   showInferredMarkers = false,
 }: SolutionTabsProps) {
+  const { copy } = useI18n();
   const selectedSolution = result.solutions[selectedSolutionIndex];
   const showMarkers = puzzle.variant === 'consecutive';
   const renderedMarkers = useMemo(() => {
@@ -89,10 +91,10 @@ export default function SolutionTabs({
   const hasSolutions = result.solutions.length > 0 && Boolean(selectedSolution);
   const commonCaption =
     result.is_unique || result.solutions.length === 1
-      ? 'Tek cozum bulundugu icin tum hucreler ortaktir.'
+      ? copy.solutionTabs.commonCaptionUnique
       : result.truncated
-        ? 'Bu bolum, bulunan cozumler arasinda ortak kalan hucreleri gosterir. Limit nedeniyle sadece bulunan cozumler uzerinden hesaplanir.'
-        : 'Bu bolum, bulunan tum cozumler arasinda degismeyen hucreleri gosterir.';
+        ? copy.solutionTabs.commonCaptionTruncated
+        : copy.solutionTabs.commonCaptionMany;
 
   return (
     <div className="solutions-panel">
@@ -115,7 +117,7 @@ export default function SolutionTabs({
                 className={index === selectedSolutionIndex ? 'solution-tab active' : 'solution-tab'}
                 onClick={() => onSelectSolution(index)}
               >
-                Cozum {index + 1}
+                {copy.solutionTabs.solutionTab(index + 1)}
               </button>
             ))}
           </div>
@@ -155,8 +157,8 @@ export default function SolutionTabs({
           <div className="common-parts-panel">
             <div className="common-parts-header">
               <div>
-                <p className="eyebrow">Ortak Kisimlar</p>
-                <h3>Cozumler arasinda sabit kalan hucreler</h3>
+                <p className="eyebrow">{copy.solutionTabs.commonEyebrow}</p>
+                <h3>{copy.solutionTabs.commonTitle}</h3>
               </div>
               <span className="common-parts-badge">
                 {commonCellCount}/{totalCellCount}

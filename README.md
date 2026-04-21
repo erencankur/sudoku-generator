@@ -1,60 +1,109 @@
-# Sudoku Generator 🧩
+# Sudoku Generator
 
-Bu projede Türk Beyin Takımı’nın eski bir üyesi olarak Sudoku ve Akıl Oyunları Turnuvalarında edindiğim tecrübeleri yazılım uygulamalarında kullanmayı amaçladım. Kendi Sudoku bulmacalarımı (Klasik ve Ardışık) oluşturmak, kuralları gerçek zamanlı olarak test etmek ve sonuçları PDF formatında dışa aktarmak amacıyla geliştirdiğim lokal bir web uygulamasıdır.
+## TR
+Sudoku Generator, klasik ve ardisik Sudoku bulmacalarini yerel ortamda uretmek, dogrulamak, cozumlemek ve PDF olarak disari aktarmak icin yazilmistir. Arayuz TR/EN destekler, ardisik kenarlar uc durumlu olarak yonetilir, tek cozum ile coklu cozum akisleri ayrilir ve PDF cikti `examplesudoku.png` referansina yaklastirilir.
 
-## 🚀 Özellikler
+### Ozellikler
+- Klasik ve ardisik Sudoku destegi.
+- 6x6 ve 9x9 boyutlari.
+- Gercek zamanli hucre ve kenar dogrulamasi.
+- Tek cozum varsa onay akisi, birden fazla cozum varsa gelistirmeye devam akisi.
+- Esnek cozum aramalarinda mavi daire limiti.
+- Ortak kisimlar gorunumu ve PDF export.
+- TR/EN dil secimi ve yerel olarak kaydedilen tercih.
 
-* **İki Farklı Oyun Türü:** Klasik Sudoku ve Ardışık (Consecutive) Sudoku desteği.
-* **Farklı Boyut Seçenekleri:** 6x6 ve 9x9 grid yapılarında çalışabilme.
-* **Gerçek Zamanlı Doğrulama (Real-Time Validation):** Grid üzerinde rakam girerken anlık kural kontrolü; çakışma durumlarında veya ardışıklık kuralı ihlallerinde hücrelerin anında kırmızıya boyanması.
-* **Akıllı Çözücü Motoru:** Arka planda çalışan Backtracking algoritması ile oluşturulan bulmacanın çözülebilirliğini ve alternatif çözüm sayılarını hesaplama.
-* **Profesyonel PDF Çıktısı:** Hazırlanan soruları ve çözümlerini, özel tasarım gridler, kalın bölge çizgileri ve ardışık çubukları (bars/circles) korunarak milimetrik hassasiyetle PDF'e aktarma.
+### Teknik Notlar
+- Frontend: React + Vite + TypeScript.
+- Backend: FastAPI + Python 3.13.
+- Solver: NumPy destekli backtracking ve kosul ayrimi.
+- PDF: ReportLab ile koordinat tabanli cizim.
+- Mimari: veritabanisiz, stateless puzzle document akisi.
+- Dil altyapisi: `frontend/src/i18n` ve `frontend/src/features/language`.
 
-## 🛠️ Kullanılan Teknolojiler (Tech Stack)
+### Calistirma
+Repo kokunden calistirin:
 
-Bu proje hızlı ve modern bir lokal web uygulaması (Local Web App) olarak tasarlanmıştır.
-
-* **Backend:** FastAPI, Python
-* **Çözücü ve Mantık (Logic):** Python, NumPy
-* **PDF Görselleştirme:** ReportLab
-* **Frontend:** HTML, CSS, JavaScript (Vanilla / React)
-* **Veritabanı:** Yok (Stateless Architecture)
-
-## 📦 Kurulum ve Çalıştırma
-
-Projeyi kendi lokal ortamınızda çalıştırmak için aşağıdaki adımları izleyebilirsiniz.
-
-**1. Repoyu Klonlayın:**
 ```bash
-git clone [https://github.com/erencankur/sudoku-generator.git](https://github.com/erencankur/sudoku-generator.git)
-cd sudoku-generator
+npm install
+npm run install:backend
+npm run dev
 ```
 
-**2. Sanal Ortam (Virtual Environment) Oluşturun ve Aktif Edin:**
-# Windows için
-python -m venv venv
-venv\Scripts\activate
+Bu komut frontend'i `5173` portunda, backend'i `8000` portunda calistirir. Sadece frontend build almak icin:
 
-# macOS / Linux için
-python3 -m venv venv
-source venv/bin/activate
+```bash
+npm run build
+```
 
-**3. Gerekli Kütüphaneleri Yükleyin:**
-pip install -r requirements.txt
+Backend testleri:
 
+```bash
+npm run test:backend
+```
 
-**4. FastAPI Sunucusunu Başlatın:**
-uvicorn main:app --reload
+### Dizin Yapisi
+- `frontend/src/domain`: puzzle modeli ve dogrulama yardimcilari.
+- `frontend/src/features/editor`: puzzle ayarlari, grid ve kenar kontrolleri.
+- `frontend/src/features/solve`: cozum akisleri ve sonuc gezgini.
+- `frontend/src/features/export`: PDF export aksiyonu.
+- `frontend/src/features/language`: dil secici.
+- `frontend/src/i18n`: copy tabloları ve provider.
+- `backend/app/api`, `backend/app/services`, `backend/app/solver`, `backend/app/pdf`, `backend/app/schemas`: backend katmanlari.
 
-Sunucu başladıktan sonra tarayıcınızda http://localhost:8000 adresine giderek uygulamayı kullanmaya başlayabilirsiniz.
+### Belgeler
+- [Proje Plani](docs/PLAN.md)
+- [Teknik Aciklama](docs/EXP.md)
 
+## EN
+Sudoku Generator is a local web app for building, validating, solving, and exporting classic and consecutive Sudoku puzzles. The UI includes TR/EN language switching, tri-state consecutive edges, a unique-vs-multiple solve flow, a common-parts view, and PDF export tuned toward `examplesudoku.png`.
 
-## 🎮 Nasıl Kullanılır?
+### Features
+- Classic and consecutive Sudoku support.
+- 6x6 and 9x9 boards.
+- Real-time cell and edge validation.
+- Approval flow for unique solutions, refinement flow for multiple solutions.
+- A configurable blue-circle limit for relaxed solves.
+- Common-parts visualization and PDF export.
+- TR/EN language selection persisted locally.
 
-* Arayüz üzerinden Klasik veya Ardışık sudoku türünü seçin.
-* Grid boyutunu (6x6 veya 9x9) belirleyin.
-* Rakamları hücrelere girin. Ardışık kuralını belirlemek için hücre sınırlarına tıklayarak işaretlerinizi (çubuk/daire) ekleyin.
-* Sistemin anlık olarak verdiği görsel uyarıları (kırmızı hücreler) dikkate alın.
-* "Çözmeyi Dene" butonuna basarak bulmacanın geçerliliğini test edin.
-* Onayladıktan sonra bulmacanızı isim ve tarih bilgisiyle birlikte PDF olarak indirin.
-* Bu proje kişisel kullanım ve algoritma geliştirme pratikleri amacıyla oluşturulmuştur.
+### Technical Notes
+- Frontend: React + Vite + TypeScript.
+- Backend: FastAPI + Python 3.13.
+- Solver: NumPy-assisted backtracking with separated constraints.
+- PDF: coordinate-driven ReportLab rendering.
+- Architecture: stateless, document-based puzzle flow with no database.
+- I18n: `frontend/src/i18n` and `frontend/src/features/language`.
+
+### Run Locally
+From the repository root:
+
+```bash
+npm install
+npm run install:backend
+npm run dev
+```
+
+This starts the frontend on port `5173` and the backend on port `8000`. To build only the frontend:
+
+```bash
+npm run build
+```
+
+To run backend tests:
+
+```bash
+npm run test:backend
+```
+
+### Directory Layout
+- `frontend/src/domain`: puzzle model and validation helpers.
+- `frontend/src/features/editor`: setup controls, grid, and edge controls.
+- `frontend/src/features/solve`: solve flow and solution browser.
+- `frontend/src/features/export`: PDF export action.
+- `frontend/src/features/language`: language switcher.
+- `frontend/src/i18n`: copy tables and provider.
+- `backend/app/api`, `backend/app/services`, `backend/app/solver`, `backend/app/pdf`, `backend/app/schemas`: backend layers.
+
+### Docs
+- [Project Plan](docs/PLAN.md)
+- [Technical Explanation](docs/EXP.md)

@@ -1,4 +1,5 @@
 import type { ConsecutiveEdgeState, EdgeCoordinate } from '../../domain/puzzle';
+import { useI18n } from '../../i18n';
 
 interface EdgeToggleLayerProps {
   orientation: EdgeCoordinate['orientation'];
@@ -7,24 +8,13 @@ interface EdgeToggleLayerProps {
   onToggle: () => void;
 }
 
-function getStateLabel(state: ConsecutiveEdgeState): string {
-  if (state === 1) {
-    return 'Mavi daire koy';
-  }
-
-  if (state === -1) {
-    return 'Kesinlikle koyma';
-  }
-
-  return 'Bos birak';
-}
-
 export default function EdgeToggleLayer({
   orientation,
   state,
   invalid,
   onToggle,
 }: EdgeToggleLayerProps) {
+  const { copy } = useI18n();
   const classes = [
     'edge-toggle',
     orientation === 'horizontal' ? 'edge-toggle-horizontal' : 'edge-toggle-vertical',
@@ -34,15 +24,16 @@ export default function EdgeToggleLayer({
     .filter(Boolean)
     .join(' ');
 
-  const orientationLabel = orientation === 'horizontal' ? 'Yatay' : 'Dikey';
+  const orientationLabel = orientation === 'horizontal' ? copy.editorLegend.horizontalAria : copy.editorLegend.verticalAria;
+  const stateLabel = state === 1 ? copy.editorLegend.required : state === -1 ? copy.editorLegend.forbidden : copy.editorLegend.empty;
 
   return (
     <button
       type="button"
       className={classes}
       onClick={onToggle}
-      aria-label={`${orientationLabel} ardisik isareti. ${getStateLabel(state)}.`}
-      title={`${orientationLabel} ardisik isareti: ${getStateLabel(state)}`}
+      aria-label={`${orientationLabel}. ${stateLabel}.`}
+      title={`${orientationLabel}: ${stateLabel}`}
     />
   );
 }

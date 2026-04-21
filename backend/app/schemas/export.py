@@ -11,6 +11,7 @@ class ExportRequest(BaseModel):
     puzzle: PuzzleDocument
     approved_solution: list[list[int]]
     solution_index: int = Field(default=0, ge=0)
+    language: str = Field(default="tr", pattern="^(tr|en)$")
 
     @model_validator(mode="after")
     def validate_solution_shape(self) -> Self:

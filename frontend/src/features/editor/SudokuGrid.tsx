@@ -2,6 +2,7 @@ import { cellHasIssue, edgeHasIssue, type ValidationIssue } from '../../domain/v
 import type { PuzzleDocument } from '../../domain/puzzle';
 import EdgeToggleLayer from './EdgeToggleLayer';
 import SudokuCell from './SudokuCell';
+import { useI18n } from '../../i18n';
 
 interface SudokuGridProps {
   puzzle: PuzzleDocument;
@@ -16,23 +17,24 @@ export default function SudokuGrid({
   onCellChange,
   onToggleEdge,
 }: SudokuGridProps) {
+  const { copy } = useI18n();
   const { size, region_shape: regionShape } = puzzle;
 
   return (
     <div className="grid-shell">
       {puzzle.variant === 'consecutive' ? (
-        <div className="edge-legend" aria-label="Ardisik isaret aciklamasi">
+        <div className="edge-legend" aria-label={copy.editorLegend.legendLabel}>
           <span className="edge-legend-item">
             <span className="edge-legend-swatch edge-legend-required" aria-hidden="true" />
-            Mavi daire koy
+            {copy.editorLegend.required}
           </span>
           <span className="edge-legend-item">
             <span className="edge-legend-swatch edge-legend-forbidden" aria-hidden="true" />
-            Kesinlikle koyma
+            {copy.editorLegend.forbidden}
           </span>
           <span className="edge-legend-item">
             <span className="edge-legend-swatch edge-legend-empty" aria-hidden="true" />
-            Bos birak
+            {copy.editorLegend.empty}
           </span>
         </div>
       ) : null}

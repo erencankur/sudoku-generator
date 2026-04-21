@@ -19,9 +19,9 @@ def build_export_pdf(request: ExportRequest) -> bytes:
     buffer = BytesIO()
     canvas = Canvas(buffer, pagesize=A4)
 
-    draw_puzzle_page(canvas, request.puzzle)
+    draw_puzzle_page(canvas, request.puzzle, request.language)
     canvas.showPage()
-    draw_solution_page(canvas, request.puzzle, request.approved_solution)
+    draw_solution_page(canvas, request.puzzle, request.approved_solution, request.language)
     canvas.save()
 
     buffer.seek(0)
