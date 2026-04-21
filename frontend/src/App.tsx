@@ -267,6 +267,7 @@ export default function App() {
                 }
                 result={solveResult}
                 selectedSolutionIndex={strictSolutionIndex}
+                showInferredMarkers={false}
                 onSelectSolution={(index) => {
                   setStrictSolutionIndex(index);
                   setStatusMessage(`Kesin yorumda Cozum ${index + 1} goruntuleniyor.`);
@@ -280,10 +281,11 @@ export default function App() {
                   puzzle={puzzle}
                   eyebrow="2. Bolum"
                   title="Mavi Daireleri Kabul Eden Cozumler"
-                  description="Bu bolum, mavi daireleri zorunlu kabul eder; isaretlenmemis komsuluklar ise var ya da yok olabilir."
+                  description="Bu bolum, mavi daireleri zorunlu kabul eder; isaretlenmemis komsuluklar ise var ya da yok olabilir. Cikan yeni mavi daireler de burada gorunur."
                   emptyMessage="Bu esnek yorum altinda cozum bulunamadi."
                   result={solveResult.relaxed}
                   selectedSolutionIndex={relaxedSolutionIndex}
+                  showInferredMarkers={true}
                   onSelectSolution={(index) => {
                     setRelaxedSolutionIndex(index);
                     setStatusMessage(`Esnek yorumda Cozum ${index + 1} goruntuleniyor.`);

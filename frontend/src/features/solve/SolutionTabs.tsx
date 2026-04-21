@@ -11,6 +11,7 @@ interface SolutionTabsProps {
   result: SolveResultSet;
   selectedSolutionIndex: number;
   onSelectSolution: (index: number) => void;
+  showInferredMarkers?: boolean;
 }
 
 export default function SolutionTabs({
@@ -22,9 +23,48 @@ export default function SolutionTabs({
   result,
   selectedSolutionIndex,
   onSelectSolution,
+  showInferredMarkers = false,
 }: SolutionTabsProps) {
   const selectedSolution = result.solutions[selectedSolutionIndex];
   const showMarkers = puzzle.variant === 'consecutive';
+  const renderedMarkers = useMemo(() => {
+    if (!showMarkers || !selectedSolution) {
+      return {
+        horizontal: [] as boolean[][],
+        vertical: [] as boolean[][],
+      };
+    }
+
+    const horizontal = Array.from({ length: puzzle.size }, () =>
+      Array.from({ length: puzzle.size - 1 }, () => false),
+    );
+    const vertical = Array.from({ length: puzzle.size - 1 }, () =>
+      Array.from({ length: puzzle.size }, () => false),
+    );
+
+    for (let row = 0; row < puzzle.size; row += 1) {
+      for (let col = 0; col < puzzle.size - 1; col += 1) {
+        const originalMarker = puzzle.consecutive_edges.horizontal[row][col];
+        const inferredMarker =
+          showInferredMarkers && Math.abs(selectedSolution[row][col] - selectedSolution[row][col + 1]) === 1;
+
+        horizontal[row][col] = originalMarker || inferredMarker;
+      }
+    }
+
+    for (let row = 0; row < puzzle.size - 1; row += 1) {
+      for (let col = 0; col < puzzle.size; col += 1) {
+        const originalMarker = puzzle.consecutive_edges.vertical[row][col];
+        const inferredMarker =
+          showInferredMarkers && Math.abs(selectedSolution[row][col] - selectedSolution[row + 1][col]) === 1;
+
+        vertical[row][col] = originalMarker || inferredMarker;
+      }
+    }
+
+    return { horizontal, vertical };
+  }, [puzzle, selectedSolution, showMarkers, showInferredMarkers]);
+
   const commonGrid = useMemo(() => {
     if (result.solutions.length === 0) {
       return [] as Array<Array<number | null>>;
@@ -86,11 +126,11 @@ export default function SolutionTabs({
                 <div key={`${rowIndex}-${colIndex}`} className="solution-cell">
                   {value}
 
-                  {showMarkers && colIndex < puzzle.size - 1 && puzzle.consecutive_edges.horizontal[rowIndex][colIndex] ? (
+                  {showMarkers && colIndex < puzzle.size - 1 && renderedMarkers.horizontal[rowIndex][colIndex] ? (
                     <span className="solution-edge solution-edge-horizontal" aria-hidden="true" />
                   ) : null}
 
-                  {showMarkers && rowIndex < puzzle.size - 1 && puzzle.consecutive_edges.vertical[rowIndex][colIndex] ? (
+                  {showMarkers && rowIndex < puzzle.size - 1 && renderedMarkers.vertical[rowIndex][colIndex] ? (
                     <span className="solution-edge solution-edge-vertical" aria-hidden="true" />
                   ) : null}
                 </div>
