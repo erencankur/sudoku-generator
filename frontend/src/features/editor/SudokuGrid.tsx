@@ -21,7 +21,7 @@ export default function SudokuGrid({
   return (
     <div className="grid-shell">
       {puzzle.variant === 'consecutive' ? (
-        <div className="edge-legend" aria-label="Ardısik isaret aciklamasi">
+        <div className="edge-legend" aria-label="Ardisik isaret aciklamasi">
           <span className="edge-legend-item">
             <span className="edge-legend-swatch edge-legend-required" aria-hidden="true" />
             Mavi daire koy
@@ -32,7 +32,7 @@ export default function SudokuGrid({
           </span>
           <span className="edge-legend-item">
             <span className="edge-legend-swatch edge-legend-empty" aria-hidden="true" />
-            Bos bırak
+            Bos birak
           </span>
         </div>
       ) : null}

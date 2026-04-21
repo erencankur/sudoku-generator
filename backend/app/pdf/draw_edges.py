@@ -33,8 +33,10 @@ def draw_consecutive_edges(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLa
                 canvas.circle(center_x, center_y, radius, stroke=1, fill=0)
                 slash = radius * 0.65
                 canvas.setStrokeColor(colors.HexColor("#8f6f6a"))
+                canvas.setLineWidth(1.1)
                 canvas.line(center_x - slash, center_y - slash, center_x + slash, center_y + slash)
                 canvas.line(center_x - slash, center_y + slash, center_x + slash, center_y - slash)
+                canvas.setLineWidth(0.9)
 
     for row in range(puzzle.size - 1):
         for col in range(puzzle.size):
@@ -55,5 +57,7 @@ def draw_consecutive_edges(canvas: Canvas, puzzle: PuzzleDocument, layout: PdfLa
                 canvas.circle(center_x, center_y, radius, stroke=1, fill=0)
                 slash = radius * 0.65
                 canvas.setStrokeColor(colors.HexColor("#8f6f6a"))
+                canvas.setLineWidth(1.1)
                 canvas.line(center_x - slash, center_y - slash, center_x + slash, center_y + slash)
                 canvas.line(center_x - slash, center_y + slash, center_x + slash, center_y - slash)
+                canvas.setLineWidth(0.9)

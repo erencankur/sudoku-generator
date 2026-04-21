@@ -16,7 +16,7 @@ function getStateLabel(state: ConsecutiveEdgeState): string {
     return 'Kesinlikle koyma';
   }
 
-  return 'Bos bırak';
+  return 'Bos birak';
 }
 
 export default function EdgeToggleLayer({
@@ -41,8 +41,8 @@ export default function EdgeToggleLayer({
       type="button"
       className={classes}
       onClick={onToggle}
-      aria-label={`${orientationLabel} ardısik isareti. ${getStateLabel(state)}.`}
-      title={`${orientationLabel} ardısik isareti: ${getStateLabel(state)}`}
+      aria-label={`${orientationLabel} ardisik isareti. ${getStateLabel(state)}.`}
+      title={`${orientationLabel} ardisik isareti: ${getStateLabel(state)}`}
     />
   );
 }
