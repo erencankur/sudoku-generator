@@ -11,7 +11,7 @@ def adjacency_rules(
     puzzle: PuzzleDocument,
     row: int,
     col: int,
-) -> Iterator[tuple[int, int, bool]]:
+) -> Iterator[tuple[int, int, int]]:
     if col > 0:
         yield row, col - 1, puzzle.consecutive_edges.horizontal[row][col - 1]
     if col < puzzle.size - 1:
@@ -30,7 +30,7 @@ def count_added_consecutive_markers(
 
     for row in range(puzzle.size):
         for col in range(puzzle.size - 1):
-            if puzzle.consecutive_edges.horizontal[row][col]:
+            if puzzle.consecutive_edges.horizontal[row][col] != 0:
                 continue
 
             if is_consecutive(solution[row][col], solution[row][col + 1]):
@@ -38,7 +38,7 @@ def count_added_consecutive_markers(
 
     for row in range(puzzle.size - 1):
         for col in range(puzzle.size):
-            if puzzle.consecutive_edges.vertical[row][col]:
+            if puzzle.consecutive_edges.vertical[row][col] != 0:
                 continue
 
             if is_consecutive(solution[row][col], solution[row + 1][col]):

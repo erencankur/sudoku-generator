@@ -14,10 +14,10 @@ REGION_SHAPES: dict[int, tuple[int, int]] = {
 }
 
 
-def _empty_edges(size: int) -> dict[str, list[list[bool]]]:
+def _empty_edges(size: int) -> dict[str, list[list[int]]]:
     return {
-        "horizontal": [[False for _ in range(size - 1)] for _ in range(size)],
-        "vertical": [[False for _ in range(size)] for _ in range(size - 1)],
+        "horizontal": [[0 for _ in range(size - 1)] for _ in range(size)],
+        "vertical": [[0 for _ in range(size)] for _ in range(size - 1)],
     }
 
 
@@ -27,8 +27,8 @@ class RegionShape(BaseModel):
 
 
 class ConsecutiveEdges(BaseModel):
-    horizontal: list[list[bool]]
-    vertical: list[list[bool]]
+    horizontal: list[list[int]]
+    vertical: list[list[int]]
 
 
 class PuzzleDocument(BaseModel):
@@ -75,5 +75,11 @@ class PuzzleDocument(BaseModel):
 
         if len(vertical) != self.size - 1 or any(len(row) != self.size for row in vertical):
             raise ValueError("Vertical edge matrix has invalid dimensions.")
+
+        for matrix in (horizontal, vertical):
+            for row in matrix:
+                for value in row:
+                    if value not in (-1, 0, 1):
+                        raise ValueError("Consecutive edge matrix contains an invalid state.")
 
         return self

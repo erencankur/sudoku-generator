@@ -20,6 +20,23 @@ export default function SudokuGrid({
 
   return (
     <div className="grid-shell">
+      {puzzle.variant === 'consecutive' ? (
+        <div className="edge-legend" aria-label="Ardısik isaret aciklamasi">
+          <span className="edge-legend-item">
+            <span className="edge-legend-swatch edge-legend-required" aria-hidden="true" />
+            Mavi daire koy
+          </span>
+          <span className="edge-legend-item">
+            <span className="edge-legend-swatch edge-legend-forbidden" aria-hidden="true" />
+            Kesinlikle koyma
+          </span>
+          <span className="edge-legend-item">
+            <span className="edge-legend-swatch edge-legend-empty" aria-hidden="true" />
+            Bos bırak
+          </span>
+        </div>
+      ) : null}
+
       <div className="sudoku-grid" style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
         {puzzle.grid.map((rowValues, row) =>
           rowValues.map((value, col) => {
@@ -47,7 +64,7 @@ export default function SudokuGrid({
                 {puzzle.variant === 'consecutive' && col < size - 1 ? (
                   <EdgeToggleLayer
                     orientation="horizontal"
-                    active={puzzle.consecutive_edges.horizontal[row][col]}
+                    state={puzzle.consecutive_edges.horizontal[row][col]}
                     invalid={edgeHasIssue(issues, 'horizontal', row, col)}
                     onToggle={() => onToggleEdge('horizontal', row, col)}
                   />
@@ -56,7 +73,7 @@ export default function SudokuGrid({
                 {puzzle.variant === 'consecutive' && row < size - 1 ? (
                   <EdgeToggleLayer
                     orientation="vertical"
-                    active={puzzle.consecutive_edges.vertical[row][col]}
+                    state={puzzle.consecutive_edges.vertical[row][col]}
                     invalid={edgeHasIssue(issues, 'vertical', row, col)}
                     onToggle={() => onToggleEdge('vertical', row, col)}
                   />

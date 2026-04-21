@@ -3,6 +3,7 @@ export type PuzzleSize = 6 | 9;
 export type GridValue = number | null;
 export type Grid = GridValue[][];
 export type CellCoordinate = [number, number];
+export type ConsecutiveEdgeState = -1 | 0 | 1;
 
 export interface RegionShape {
   rows: number;
@@ -10,8 +11,8 @@ export interface RegionShape {
 }
 
 export interface ConsecutiveEdges {
-  horizontal: boolean[][];
-  vertical: boolean[][];
+  horizontal: ConsecutiveEdgeState[][];
+  vertical: ConsecutiveEdgeState[][];
 }
 
 export interface EdgeCoordinate {
@@ -40,8 +41,8 @@ const DEFAULT_NAMES: Record<PuzzleVariant, string> = {
   consecutive: 'Ardisik Sudoku',
 };
 
-function createBooleanMatrix(rows: number, cols: number): boolean[][] {
-  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => false));
+function createEdgeStateMatrix(rows: number, cols: number): ConsecutiveEdgeState[][] {
+  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
 }
 
 function createGrid(size: PuzzleSize): Grid {
@@ -77,8 +78,8 @@ export function createEmptyPuzzle(
     region_shape: getRegionShape(size),
     grid: createGrid(size),
     consecutive_edges: {
-      horizontal: createBooleanMatrix(size, size - 1),
-      vertical: createBooleanMatrix(size - 1, size),
+      horizontal: createEdgeStateMatrix(size, size - 1),
+      vertical: createEdgeStateMatrix(size - 1, size),
     },
   };
 }
@@ -142,7 +143,8 @@ export function toggleEdge(
       ? nextPuzzle.consecutive_edges.horizontal
       : nextPuzzle.consecutive_edges.vertical;
 
-  targetMatrix[row][col] = !targetMatrix[row][col];
+  const currentState = targetMatrix[row][col];
+  targetMatrix[row][col] = currentState === 0 ? 1 : currentState === 1 ? -1 : 0;
   return nextPuzzle;
 }
 

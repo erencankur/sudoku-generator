@@ -32,21 +32,20 @@ def satisfies_adjacent_constraints(
     row: int,
     col: int,
     candidate: int,
-    allow_unmarked_consecutive: bool = False,
 ) -> bool:
     if puzzle.variant != "consecutive":
         return True
 
-    for neighbor_row, neighbor_col, has_marker in adjacency_rules(puzzle, row, col):
+    for neighbor_row, neighbor_col, marker_state in adjacency_rules(puzzle, row, col):
         neighbor_value = int(board[neighbor_row, neighbor_col])
         if neighbor_value == 0:
             continue
 
         candidate_is_consecutive = is_consecutive(neighbor_value, candidate)
 
-        if has_marker and not candidate_is_consecutive:
+        if marker_state == 1 and not candidate_is_consecutive:
             return False
-        if not has_marker and candidate_is_consecutive and not allow_unmarked_consecutive:
+        if marker_state == -1 and candidate_is_consecutive:
             return False
 
     return True
@@ -57,7 +56,6 @@ def candidate_values(
     puzzle: PuzzleDocument,
     row: int,
     col: int,
-    allow_unmarked_consecutive: bool = False,
 ) -> list[int]:
     if int(board[row, col]) != 0:
         return []
@@ -68,14 +66,7 @@ def candidate_values(
     for candidate in range(1, puzzle.size + 1):
         if candidate in disallowed:
             continue
-        if satisfies_adjacent_constraints(
-            board,
-            puzzle,
-            row,
-            col,
-            candidate,
-            allow_unmarked_consecutive=allow_unmarked_consecutive,
-        ):
+        if satisfies_adjacent_constraints(board, puzzle, row, col, candidate):
             candidates.append(candidate)
 
     return candidates

@@ -127,7 +127,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
         const isConsecutive = Math.abs(left - right) === 1;
         const marker = puzzle.consecutive_edges.horizontal[row][col];
 
-        if (marker && !isConsecutive) {
+        if (marker === 1 && !isConsecutive) {
           addIssue(issues, {
             type: 'consecutive_violation',
             cells: [
@@ -139,7 +139,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
           });
         }
 
-        if (!marker && isConsecutive) {
+        if (marker === -1 && isConsecutive) {
           addIssue(issues, {
             type: 'non_consecutive_violation',
             cells: [
@@ -165,7 +165,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
         const isConsecutive = Math.abs(top - bottom) === 1;
         const marker = puzzle.consecutive_edges.vertical[row][col];
 
-        if (marker && !isConsecutive) {
+        if (marker === 1 && !isConsecutive) {
           addIssue(issues, {
             type: 'consecutive_violation',
             cells: [
@@ -177,7 +177,7 @@ export function validatePuzzleDocument(puzzle: PuzzleDocument): ValidationRespon
           });
         }
 
-        if (!marker && isConsecutive) {
+        if (marker === -1 && isConsecutive) {
           addIssue(issues, {
             type: 'non_consecutive_violation',
             cells: [

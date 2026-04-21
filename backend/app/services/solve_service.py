@@ -67,18 +67,7 @@ def solve_puzzle_document(
 
     relaxed_result = None
     if puzzle.variant == "consecutive":
-        relaxed_validation = validate_puzzle(puzzle, allow_unmarked_consecutive=True)
-        relaxed_enumeration = (
-            enumerate_solutions(
-                puzzle,
-                solution_limit,
-                allow_unmarked_consecutive=True,
-            )
-            if relaxed_validation.is_valid
-            else None
-        )
-        relaxed_result = _build_result_set(relaxed_validation, relaxed_enumeration)
-        relaxed_result = _filter_by_marker_limit(puzzle, relaxed_result, max_added_blue_circles)
+        relaxed_result = _filter_by_marker_limit(puzzle, strict_result, max_added_blue_circles)
 
     return SolveResponse(**strict_result.model_dump(), relaxed=relaxed_result)
 

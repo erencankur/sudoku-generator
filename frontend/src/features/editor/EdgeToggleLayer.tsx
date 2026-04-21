@@ -1,33 +1,48 @@
-import type { EdgeCoordinate } from '../../domain/puzzle';
+import type { ConsecutiveEdgeState, EdgeCoordinate } from '../../domain/puzzle';
 
 interface EdgeToggleLayerProps {
   orientation: EdgeCoordinate['orientation'];
-  active: boolean;
+  state: ConsecutiveEdgeState;
   invalid: boolean;
   onToggle: () => void;
 }
 
+function getStateLabel(state: ConsecutiveEdgeState): string {
+  if (state === 1) {
+    return 'Mavi daire koy';
+  }
+
+  if (state === -1) {
+    return 'Kesinlikle koyma';
+  }
+
+  return 'Bos bırak';
+}
+
 export default function EdgeToggleLayer({
   orientation,
-  active,
+  state,
   invalid,
   onToggle,
 }: EdgeToggleLayerProps) {
   const classes = [
     'edge-toggle',
     orientation === 'horizontal' ? 'edge-toggle-horizontal' : 'edge-toggle-vertical',
-    active ? 'active' : '',
+    state === 1 ? 'edge-toggle-required' : state === -1 ? 'edge-toggle-forbidden' : 'edge-toggle-empty',
     invalid ? 'invalid' : '',
   ]
     .filter(Boolean)
     .join(' ');
+
+  const orientationLabel = orientation === 'horizontal' ? 'Yatay' : 'Dikey';
 
   return (
     <button
       type="button"
       className={classes}
       onClick={onToggle}
-      aria-label={orientation === 'horizontal' ? 'Yatay ardısik isareti' : 'Dikey ardısik isareti'}
+      aria-label={`${orientationLabel} ardısik isareti. ${getStateLabel(state)}.`}
+      title={`${orientationLabel} ardısik isareti: ${getStateLabel(state)}`}
     />
   );
 }
