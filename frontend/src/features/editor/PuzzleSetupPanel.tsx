@@ -88,7 +88,7 @@ export default function PuzzleSetupPanel({
           value={solutionLimit}
           onChange={(event) => {
             const parsed = Number.parseInt(event.target.value, 10);
-            onSolutionLimitChange(Number.isNaN(parsed) ? 1 : Math.max(1, Math.min(parsed, 40)));
+            onSolutionLimitChange(Number.isNaN(parsed) ? 1 : Math.max(1, Math.min(parsed, 144)));
           }}
         />
       </div>
