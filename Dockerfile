@@ -11,7 +11,7 @@ RUN npm run build
 FROM python:3.13-slim AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=8000 \
+    PORT=9999 \
     FRONTEND_DIST_DIR=/app/frontend/dist
 
 WORKDIR /app
@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir ./backend
 
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
-EXPOSE 8000
+EXPOSE 9999
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD python -c "import os, urllib.request; urllib.request.urlopen(f'http://127.0.0.1:{os.getenv(\"PORT\", \"8000\")}/api/health', timeout=3).read()"
+  CMD python -c "import os, urllib.request; urllib.request.urlopen(f'http://127.0.0.1:{os.getenv(\"PORT\", \"9999\")}/api/health', timeout=3).read()"
 
-CMD ["sh", "-c", "uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers"]
+CMD ["sh", "-c", "uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port ${PORT:-9999} --proxy-headers"]

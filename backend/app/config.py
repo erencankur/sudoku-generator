@@ -21,7 +21,7 @@ def _path_env(name: str, default: Path) -> Path:
 APP_ENV = os.getenv("APP_ENV", "development")
 APP_NAME = os.getenv("APP_NAME", "Sudoku Generator")
 APP_VERSION = os.getenv("APP_VERSION", "0.1.0")
-PORT = int(os.getenv("PORT", "8000"))
+PORT = int(os.getenv("PORT", "9999"))
 FRONTEND_DIST_DIR = _path_env("FRONTEND_DIST_DIR", PROJECT_ROOT / "frontend" / "dist")
 
 CORS_ALLOW_ORIGINS = _csv_env(

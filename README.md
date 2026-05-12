@@ -49,24 +49,26 @@ Lokal gelistirme icin `.env` dosyasi olusturulmustur ve git disinda tutulur. Pay
 APP_ENV=production
 APP_NAME=Sudoku Generator
 APP_VERSION=0.1.0
-PORT=8000
+PORT=9999
 FRONTEND_DIST_DIR=/app/frontend/dist
-CORS_ALLOW_ORIGINS=
+CORS_ALLOW_ORIGINS=https://sudokugenerator.vibesofters.com
 ```
 
-`CORS_ALLOW_ORIGINS` ayni domain uzerinden servis edildiginde bos kalabilir. Frontend ve backend farkli domainlerde yayinlanacaksa virgulle ayrilmis origin listesi girin.
+`CORS_ALLOW_ORIGINS` production domaini olarak `https://sudokugenerator.vibesofters.com` degerini kullanir. Frontend ve backend farkli domainlerde yayinlanacaksa virgulle ayrilmis origin listesi girin.
+
+Lokal production provasi yaparken Docker disinda `npm run start` kullanacaksaniz `FRONTEND_DIST_DIR=frontend/dist` olarak gecici override edebilirsiniz. Coolify/Docker icin dogru deger `/app/frontend/dist` olmalidir.
 
 ### Docker ile Calistirma
 
 ```bash
 docker build -t sudoku-generator .
-docker run --rm -p 8000:8000 --env-file .env sudoku-generator
+docker run --rm -p 9999:9999 --env-file .env sudoku-generator
 ```
 
 Saglik kontrolu:
 
 ```bash
-curl http://localhost:8000/api/health
+curl http://localhost:9999/api/health
 ```
 
 ### Coolify ile Yayinlama
@@ -74,19 +76,19 @@ curl http://localhost:8000/api/health
 2. Coolify'da **Create New Resource** ile repo kaynagini secin.
 3. Build Pack olarak **Dockerfile** secin.
 4. Base Directory olarak repo kokunu kullanin. Bu proje baska bir monorepo altinda duruyorsa base directory `/sudoku-generator` olmalidir.
-5. Network/Ports alaninda container portunu `8000` yapin.
+5. Network/Ports alaninda container portunu `9999` yapin.
 6. Environment Variables bolumune `.env.example` icindeki degerleri girin. Production icin onerilenler:
 
 ```env
 APP_ENV=production
 APP_NAME=Sudoku Generator
 APP_VERSION=0.1.0
-PORT=8000
+PORT=9999
 FRONTEND_DIST_DIR=/app/frontend/dist
-CORS_ALLOW_ORIGINS=
+CORS_ALLOW_ORIGINS=https://sudokugenerator.vibesofters.com
 ```
 
-7. Domain tanimlayin ve HTTPS'i acik birakin.
+7. Domain olarak `sudokugenerator.vibesofters.com` tanimlayin ve HTTPS'i acik birakin.
 8. Health check path olarak `/api/health` kullanin. Dockerfile icinde de healthcheck tanimli oldugu icin Coolify container sagligini bu endpoint uzerinden dogrulayabilir.
 9. Deploy edin. Deployment sonrasinda domaini acip ana sayfayi ve `/api/health` endpointini kontrol edin.
 
