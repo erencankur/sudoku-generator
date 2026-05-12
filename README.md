@@ -15,6 +15,7 @@ Sudoku Generator, klasik ve ardisik Sudoku bulmacalarini yerel ortamda uretmek, 
 ### Teknik Notlar
 - Frontend: React + Vite + TypeScript.
 - Backend: FastAPI + Python 3.13.
+- Deployment: tek Docker image; FastAPI hem API'yi hem `frontend/dist` statik dosyalarini sunar.
 - Solver: NumPy destekli backtracking ve kosul ayrimi.
 - PDF: ReportLab ile koordinat tabanli cizim.
 - Mimari: veritabanisiz, stateless puzzle document akisi.
@@ -40,6 +41,54 @@ Backend testleri:
 ```bash
 npm run test:backend
 ```
+
+### Ortam Degiskenleri
+Lokal gelistirme icin `.env` dosyasi olusturulmustur ve git disinda tutulur. Paylasilabilir sablon `.env.example` dosyasidir.
+
+```bash
+APP_ENV=production
+APP_NAME=Sudoku Generator
+APP_VERSION=0.1.0
+PORT=8000
+FRONTEND_DIST_DIR=/app/frontend/dist
+CORS_ALLOW_ORIGINS=
+```
+
+`CORS_ALLOW_ORIGINS` ayni domain uzerinden servis edildiginde bos kalabilir. Frontend ve backend farkli domainlerde yayinlanacaksa virgulle ayrilmis origin listesi girin.
+
+### Docker ile Calistirma
+
+```bash
+docker build -t sudoku-generator .
+docker run --rm -p 8000:8000 --env-file .env sudoku-generator
+```
+
+Saglik kontrolu:
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+### Coolify ile Yayinlama
+1. Projeyi GitHub/GitLab reposuna push edin.
+2. Coolify'da **Create New Resource** ile repo kaynagini secin.
+3. Build Pack olarak **Dockerfile** secin.
+4. Base Directory olarak repo kokunu kullanin. Bu proje baska bir monorepo altinda duruyorsa base directory `/sudoku-generator` olmalidir.
+5. Network/Ports alaninda container portunu `8000` yapin.
+6. Environment Variables bolumune `.env.example` icindeki degerleri girin. Production icin onerilenler:
+
+```env
+APP_ENV=production
+APP_NAME=Sudoku Generator
+APP_VERSION=0.1.0
+PORT=8000
+FRONTEND_DIST_DIR=/app/frontend/dist
+CORS_ALLOW_ORIGINS=
+```
+
+7. Domain tanimlayin ve HTTPS'i acik birakin.
+8. Health check path olarak `/api/health` kullanin. Dockerfile icinde de healthcheck tanimli oldugu icin Coolify container sagligini bu endpoint uzerinden dogrulayabilir.
+9. Deploy edin. Deployment sonrasinda domaini acip ana sayfayi ve `/api/health` endpointini kontrol edin.
 
 ### Dizin Yapisi
 - `frontend/src/domain`: puzzle modeli ve dogrulama yardimcilari.
@@ -69,6 +118,7 @@ Sudoku Generator is a local web app for building, validating, solving, and expor
 ### Technical Notes
 - Frontend: React + Vite + TypeScript.
 - Backend: FastAPI + Python 3.13.
+- Deployment: single Docker image; FastAPI serves both the API and the built `frontend/dist` assets.
 - Solver: NumPy-assisted backtracking with separated constraints.
 - PDF: coordinate-driven ReportLab rendering.
 - Architecture: stateless, document-based puzzle flow with no database.

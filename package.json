@@ -7,11 +7,12 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "npm --workspace frontend run dev",
-    "dev:backend": "cd backend && /usr/local/bin/python3 -m uvicorn app.main:app --reload --port 8000",
+    "dev:backend": "cd backend && python3 -m uvicorn app.main:app --reload --port 8000",
+    "start": "cd backend && python3 -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers",
     "build": "npm --workspace frontend run build",
     "test:frontend": "npm --workspace frontend run build",
-    "test:backend": "cd backend && /usr/local/bin/python3 -m pytest",
-    "install:backend": "cd backend && /usr/local/bin/python3 -m pip install -e .[dev]"
+    "test:backend": "cd backend && python3 -m pytest",
+    "install:backend": "cd backend && python3 -m pip install -e .[dev]"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"
